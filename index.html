@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>詠晴漢方 官方選物</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans TC', '微軟正黑體', sans-serif;
+      background: #faf8f5;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background: #3d6b4f;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .logo { font-size: 20px; font-weight: 700; letter-spacing: 2px; }
+    .logo span { font-size: 12px; display: block; font-weight: 400; opacity: 0.8; letter-spacing: 1px; }
+    .cart-btn {
+      background: #f0c060;
+      color: #333;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      position: relative;
+    }
+    .cart-count {
+      background: #e05c3a;
+      color: white;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 4px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      background: white;
+      border-bottom: 1px solid #e8e0d5;
+      padding: 12px 24px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-label { font-size: 13px; color: #888; margin-right: 4px; }
+    .filter-btn {
+      padding: 6px 14px;
+      border: 1.5px solid #d0c9be;
+      border-radius: 20px;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+      color: #555;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #3d6b4f;
+      border-color: #3d6b4f;
+      color: white;
+    }
+    .search-box {
+      margin-left: auto;
+      padding: 6px 12px;
+      border: 1.5px solid #d0c9be;
+      border-radius: 20px;
+      font-size: 13px;
+      outline: none;
+      width: 180px;
+    }
+    .search-box:focus { border-color: #3d6b4f; }
+
+    /* Product grid */
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #3d6b4f;
+      margin-bottom: 16px;
+      padding-left: 10px;
+      border-left: 4px solid #3d6b4f;
+    }
+    .product-count { font-size: 13px; color: #999; font-weight: 400; margin-left: 8px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    /* Product card */
+    .card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .card.out-of-stock { opacity: 0.5; pointer-events: none; }
+    .card-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #f0ebe3;
+    }
+    .card-img-placeholder {
+      width: 100%;
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #e8f0e9, #d5e8d5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+    .card-body { padding: 12px 14px 14px; }
+    .card-category {
+      font-size: 11px;
+      color: #3d6b4f;
+      background: #e8f0e9;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2c2c2c;
+      line-height: 1.4;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-weight { font-size: 11px; color: #aaa; margin-bottom: 8px; }
+    .card-price-section { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8f5f0;
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .price-row.bundle { background: #eef4ee; }
+    .price-label { font-size: 11px; color: #888; }
+    .price-value { font-size: 16px; font-weight: 700; color: #c0392b; }
+    .price-value.bundle { color: #2c5038; }
+    .add-btn {
+      background: #3d6b4f;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .add-btn:hover { background: #2c5038; }
+    .out-badge {
+      background: #ccc;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    /* Cart panel */
+    .cart-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+    }
+    .cart-overlay.open { display: block; }
+    .cart-panel {
+      position: fixed;
+      right: 0; top: 0; bottom: 0;
+      width: 380px;
+      background: white;
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s;
+    }
+    .cart-panel.open { transform: translateX(0); }
+    .cart-header {
+      background: #3d6b4f;
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-header h2 { font-size: 16px; }
+    .close-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 16px; }
+    .cart-empty { text-align: center; color: #aaa; padding: 40px; font-size: 14px; }
+    .cart-item {
+      display: flex;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0ebe3;
+      align-items: center;
+    }
+    .cart-item img {
+      width: 60px; height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f0ebe3;
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .cart-item-price { font-size: 13px; color: #c0392b; }
+    .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 24px; height: 24px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .qty-num { font-size: 13px; font-weight: 700; }
+    .remove-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; }
+
+    /* Order form */
+    .cart-footer { padding: 16px; border-top: 2px solid #f0ebe3; }
+    .cart-total { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; }
+    .cart-total span { color: #c0392b; }
+    .order-btn {
+      width: 100%;
+      background: #3d6b4f;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-btn:hover { background: #2c5038; }
+
+    /* Order modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #3d6b4f; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #555; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #3d6b4f;
+    }
+    .form-group textarea { height: 80px; resize: none; }
+    .order-summary {
+      background: #f8f5f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .order-summary-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .order-summary-total {
+      border-top: 1px solid #ddd;
+      margin-top: 8px;
+      padding-top: 8px;
+      font-weight: 700;
+      color: #c0392b;
+    }
+    .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+    .cancel-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .submit-btn {
+      flex: 2;
+      padding: 12px;
+      background: #3d6b4f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .submit-btn:hover { background: #2c5038; }
+
+    /* Success */
+    .success-msg {
+      text-align: center;
+      padding: 20px;
+    }
+    .success-msg .check { font-size: 48px; margin-bottom: 12px; }
+    .success-msg h3 { font-size: 18px; color: #3d6b4f; margin-bottom: 8px; }
+    .success-msg p { font-size: 13px; color: #888; line-height: 1.6; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      transition: transform 0.3s;
+      z-index: 500;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .cart-panel { width: 100%; }
+      .filter-bar { padding: 10px 12px; }
+      .search-box { width: 120px; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    詠晴漢方
+    <span>Healthy Forever</span>
+  </div>
+  <button class="cart-btn" onclick="openCart()">
+    🛒 購物車 <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+  <span class="filter-label">分類</span>
+  <button class="filter-btn active" onclick="filterCategory('all', this)">全部</button>
+  <button class="filter-btn" onclick="filterCategory('漢方足浴包', this)">漢方足浴包</button>
+  <button class="filter-btn" onclick="filterCategory('藥膳燉湯包', this)">藥膳燉湯包</button>
+  <button class="filter-btn" onclick="filterCategory('養生茶飲', this)">養生茶飲</button>
+  <button class="filter-btn" onclick="filterCategory('初戀系果乾', this)">初戀系果乾</button>
+  <button class="filter-btn" onclick="filterCategory('外用保健', this)">外用保健</button>
+  <button class="filter-btn" onclick="filterCategory('食品調味料', this)">食品調味料</button>
+  <input class="search-box" type="text" placeholder="搜尋商品…" oninput="searchProducts(this.value)">
+</div>
+
+<!-- Product grid -->
+<div class="container">
+  <div class="section-title">
+    商品列表 <span class="product-count" id="productCount"></span>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</div>
+
+<!-- Cart panel -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h2>🛒 購物車</h2>
+    <button class="close-btn" onclick="closeCart()">×</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total">合計 <span id="cartTotal">$0</span></div>
+    <button class="order-btn" onclick="openOrderForm()">填寫訂單資料</button>
+  </div>
+</div>
+
+<!-- Order modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div id="formView">
+      <h2>訂單資料</h2>
+      <div class="order-summary" id="orderSummary"></div>
+      <div class="form-group">
+        <label>姓名 *</label>
+        <input type="text" id="fName" placeholder="請輸入姓名">
+      </div>
+      <div class="form-group">
+        <label>手機 *</label>
+        <input type="tel" id="fPhone" placeholder="0912-345-678">
+      </div>
+      <div class="form-group">
+        <label>寄送地址 *</label>
+        <input type="text" id="fAddress" placeholder="縣市＋鄉鎮＋詳細地址">
+      </div>
+      <div class="form-group">
+        <label>付款方式</label>
+        <select id="fPayment" onchange="togglePaymentNote()">
+          <option value="transfer">銀行轉帳</option>
+          <option value="linepay">LINE Pay</option>
+          <option value="applepay">Apple Pay</option>
+        </select>
+        <div id="applePayNote" style="display:none;margin-top:6px;font-size:12px;color:#888;">訂單確認後，我們將傳送 Apple Pay 付款連結給您</div>
+      </div>
+      <div class="form-group">
+        <label>備註</label>
+        <textarea id="fNote" placeholder="特殊需求、到府取貨時段等…"></textarea>
+      </div>
+      <div class="modal-btns">
+        <button class="cancel-btn" onclick="closeOrderForm()">取消</button>
+        <button class="submit-btn" onclick="submitOrder()">確認送出訂單</button>
+      </div>
+    </div>
+    <div id="successView" class="success-msg" style="display:none">
+      <div class="check">✅</div>
+      <h3>訂單已送出！</h3>
+      <p>我們將在 24 小時內以電話或 LINE 與您確認訂單及付款資訊。<br>感謝您支持詠晴漢方！</p>
+      <div class="modal-btns" style="margin-top:20px">
+        <button class="submit-btn" onclick="closeOrderForm()">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 商品資料（直接嵌入，後續可改為 fetch JSON）──
+const products = [
+  {
+    id: 'hf001',
+    name: '仙楂餅・粒 仙梅粒 600g',
+    category: '零食',
+    price: 94,
+    description: '仙楂餅粒與仙梅粒組合，酸甜開胃',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81zth-mhk3wzveo35xed.webp',
+    inStock: true,
+    tags: ['果乾', '仙楂', '熱銷']
+  },
+  {
+    id: 'hf002',
+    name: '仙楂餅・粒',
+    category: '零食',
+    price: 0,
+    description: '仙楂餅粒，目前暫無庫存',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81zti-mhk1o6aj1ts098.webp',
+    inStock: false,
+    tags: ['果乾', '仙楂']
+  },
+  {
+    id: 'hf003',
+    name: '加味四神湯',
+    category: '藥膳燉湯包',
+    price: 162,
+    description: '調整體質，滋補養身，促進消化',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81ztm-mh8uvv72sxsc13.webp',
+    inStock: true,
+    tags: ['四神湯', '藥膳', '消化']
+  },
+  {
+    id: 'hf004',
+    name: '手切八仙果',
+    category: '零食',
+    price: 89,
+    description: '手切帶皮八仙果，原味與烏梅口味可選',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81ztg-mhsft8ruv0u906.webp',
+    inStock: true,
+    tags: ['果乾', '八仙果', '烏梅']
+  },
+  {
+    id: 'hf005',
+    name: '初戀 情人果',
+    category: '初戀系果乾',
+    price: 135,
+    description: '嚴選新鮮香濃芒果製作，低糖低鹽，自然純真風味',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-820li-mk37wef1qj2ae1.webp',
+    inStock: true,
+    tags: ['果乾', '情人果', '芒果']
+  },
+  {
+    id: 'hf006',
+    name: '初戀 雪霜橄欖',
+    category: '初戀系果乾',
+    price: 135,
+    weight: '250g/包',
+    description: '金門名產，去籽橄欖，獨家秘方，天然果乾，脆口甘甜',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-820l8-mk3al3qa6j2ba1.webp',
+    inStock: true,
+    tags: ['果乾', '橄欖']
+  },
+  {
+    id: 'hf007',
+    name: '龜鹿二仙四珍',
+    category: '藥膳燉湯包',
+    price: 162,
+    weight: '160克/包',
+    description: '四物與龜鹿雙寶，靈活行動力，龜鹿二仙膠質補充，秋冬進補',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81zte-mha4prfizax8da.webp',
+    inStock: true,
+    tags: ['龜鹿二仙', '藥膳', '補身']
+  },
+  {
+    id: 'hf008',
+    name: '九層塔頭 燉排骨',
+    category: '藥膳燉湯包',
+    price: 135,
+    weight: '120克/包',
+    description: '滋補強身，成長發育，四季食補，秋冬進補',
+    image: 'https://down-tw.img.susercontent.com/file/tw-11134207-81ztq-mh9zjap9xn2lb7.webp',
+    inStock: true,
+    tags: ['九層塔', '藥膳', '燉排骨']
+  },
+  {
+    id: 'hf041',
+    name: '梳絡通透夜好眠足浴包',
+    category: '漢方足浴包',
+    price: 34,
+    priceBundle: 162,
+    bundleDesc: '10入/袋',
+    weight: '10克/包',
+    description: '桂皮、澤蘭、紅花、艾草、仲筋草，舒緩放鬆、消除疲勞、緩助入睡',
+    image: 'images/漢方/hf041.jpg',
+    inStock: true,
+    tags: ['足浴', '助眠', '氣血']
+  },
+  {
+    id: 'hf042',
+    name: '月月溫順好心情足浴包',
+    category: '漢方足浴包',
+    price: 34,
+    priceBundle: 162,
+    bundleDesc: '10入/袋',
+    weight: '10克/包',
+    description: '益母草、丹蔘、川芎、紅玫瑰、澤蘭、薑片，促進代謝、紅潤養顏',
+    image: 'images/漢方/hf042.jpg',
+    inStock: true,
+    tags: ['足浴', '女性調養', '玫瑰']
+  },
+  {
+    id: 'hf043',
+    name: '溫潤暖身大風草足浴包',
+    category: '漢方足浴包',
+    price: 34,
+    priceBundle: 162,
+    bundleDesc: '10入/袋',
+    weight: '15克/包',
+    description: '大風草、艾葉、香茅、薑片、桂枝，手腳暖和、產後進補、女性調養',
+    image: 'images/漢方/hf043.jpg',
+    inStock: true,
+    tags: ['足浴', '暖身', '艾草']
+  },
+  {
+    id: 'hf044',
+    name: '無濕窈窕好輕盈足浴包',
+    category: '漢方足浴包',
+    price: 34,
+    priceBundle: 162,
+    bundleDesc: '10入/袋',
+    weight: '10克/包',
+    description: '荷葉、蒲公英、香茅、迷迭香、薑片，輕盈代謝、舒緩窈窕',
+    image: 'images/漢方/hf044.jpg',
+    inStock: true,
+    tags: ['足浴', '輕盈', '代謝']
+  }
+];
+
+// ── 狀態 ──
+let cart = [];
+let currentFilter = 'all';
+let currentSearch = '';
+
+// ── 渲染商品 ──
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  const filtered = products.filter(p => {
+    const matchCat = currentFilter === 'all' || p.category === currentFilter;
+    const matchSearch = currentSearch === '' ||
+      p.name.includes(currentSearch) ||
+      (p.description && p.description.includes(currentSearch)) ||
+      p.tags.some(t => t.includes(currentSearch));
+    return matchCat && matchSearch;
+  });
+
+  document.getElementById('productCount').textContent = `共 ${filtered.length} 件`;
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="card ${p.inStock ? '' : 'out-of-stock'}" onclick="addToCart('${p.id}')">
+      ${p.image
+        ? `<img class="card-img" src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : ''}
+      <div class="card-img-placeholder" style="display:${p.image ? 'none' : 'flex'}">🌿</div>
+      <div class="card-body">
+        <div class="card-category">${p.category}</div>
+        <div class="card-name">${p.name}</div>
+        ${p.weight ? `<div class="card-weight">📦 ${p.weight}</div>` : ''}
+        <div class="card-desc">${p.description || ''}</div>
+        ${p.inStock ? `
+        <div class="card-price-section">
+          <div class="price-row">
+            <div>
+              <div class="price-label">單包</div>
+              <div class="price-value">$${p.price}</div>
+            </div>
+            <button class="add-btn" onclick="event.stopPropagation();addToCart('${p.id}','single')">加入</button>
+          </div>
+          ${p.priceBundle ? `
+          <div class="price-row bundle">
+            <div>
+              <div class="price-label">${p.bundleDesc}</div>
+              <div class="price-value bundle">$${p.priceBundle}</div>
+            </div>
+            <button class="add-btn" onclick="event.stopPropagation();addToCart('${p.id}','bundle')">加入</button>
+          </div>` : ''}
+        </div>` : `<div style="margin-top:10px"><span class="out-badge">已售完</span></div>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── 篩選 ──
+function filterCategory(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+
+function searchProducts(val) {
+  currentSearch = val;
+  renderProducts();
+}
+
+// ── 購物車 ──
+function addToCart(id, type = 'single') {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const cartId = `${id}_${type}`;
+  const isBundle = type === 'bundle';
+  const price = isBundle ? p.priceBundle : p.price;
+  const label = isBundle ? p.bundleDesc : '單包';
+  const existing = cart.find(x => x.cartId === cartId);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ cartId, id, name: p.name, price, label, image: p.image, qty: 1 });
+  }
+  updateCartUI();
+  showToast(`✅ 已加入「${p.name}」${label}`);
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  document.getElementById('cartCount').textContent = cart.reduce((s, x) => s + x.qty, 0);
+  document.getElementById('cartTotal').textContent = `$${total}`;
+
+  const itemsEl = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    itemsEl.innerHTML = '<div class="cart-empty">購物車是空的</div>';
+    return;
+  }
+  itemsEl.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img src="${item.image}" alt="${item.name}" onerror="this.style.background='#f0ebe3'">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price" style="color:#888;font-size:12px;margin-bottom:2px">${item.label}</div>
+        <div class="cart-item-price">$${item.price} × ${item.qty} = $${item.price * item.qty}</div>
+        <div class="qty-ctrl" style="margin-top:6px">
+          <button class="qty-btn" onclick="changeQty('${item.cartId}', -1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${item.cartId}', 1)">＋</button>
+        </div>
+      </div>
+      <button class="remove-btn" onclick="removeItem('${item.cartId}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+function changeQty(cartId, delta) {
+  const item = cart.find(x => x.cartId === cartId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(x => x.cartId !== cartId);
+  updateCartUI();
+}
+
+function removeItem(cartId) {
+  cart = cart.filter(x => x.cartId !== cartId);
+  updateCartUI();
+}
+
+function openCart() {
+  document.getElementById('cartOverlay').classList.add('open');
+  document.getElementById('cartPanel').classList.add('open');
+  updateCartUI();
+}
+
+function closeCart() {
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.getElementById('cartPanel').classList.remove('open');
+}
+
+// ── 訂單表單 ──
+function openOrderForm() {
+  if (cart.length === 0) { showToast('請先加入商品'); return; }
+  closeCart();
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  document.getElementById('orderSummary').innerHTML = `
+    ${cart.map(x => `
+      <div class="order-summary-item">
+        <span>${x.name} × ${x.qty}</span>
+        <span>$${x.price * x.qty}</span>
+      </div>
+    `).join('')}
+    <div class="order-summary-item order-summary-total">
+      <span>合計</span><span>$${total}</span>
+    </div>
+  `;
+  document.getElementById('formView').style.display = 'block';
+  document.getElementById('successView').style.display = 'none';
+  document.getElementById('orderModal').classList.add('open');
+}
+
+function closeOrderForm() {
+  document.getElementById('orderModal').classList.remove('open');
+}
+
+// ── Google Apps Script 端點（部署後貼上網址）──
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyn6DJB1dAPz1MLVAEB2sM2D2wa9dq6Y33SpHkrWm6-tG98Em_msW8dcB-yEq-5pVYTCg/exec';
+
+function togglePaymentNote() {
+  const val = document.getElementById('fPayment').value;
+  document.getElementById('applePayNote').style.display = val === 'applepay' ? 'block' : 'none';
+}
+
+async function submitOrder() {
+  const name = document.getElementById('fName').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  const address = document.getElementById('fAddress').value.trim();
+  if (!name || !phone || !address) {
+    showToast('⚠️ 請填寫姓名、手機與地址');
+    return;
+  }
+
+  const paymentMap = { transfer: '銀行轉帳', linepay: 'LINE Pay', applepay: 'Apple Pay' };
+  const paymentVal = document.getElementById('fPayment').value;
+  const itemsText = cart.map(i => {
+    const label = i.type === 'bundle' ? `${i.name}（${i.bundleDesc || '整組'}）` : i.name;
+    const unitPrice = i.type === 'bundle' ? i.priceBundle : i.price;
+    return `${label} x${i.qty} $${unitPrice * i.qty}`;
+  }).join('\n');
+  const total = cart.reduce((s, i) => s + (i.type === 'bundle' ? i.priceBundle : i.price) * i.qty, 0);
+
+  const orderData = {
+    name,
+    phone,
+    address,
+    payment: paymentMap[paymentVal] || paymentVal,
+    items: itemsText,
+    total,
+    note: document.getElementById('fNote').value.trim()
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(orderData)
+    });
+  } catch (e) {
+    // 送出失敗仍顯示成功畫面（避免使用者重複送單）
+    console.error('訂單送出失敗', e);
+  }
+
+  cart = [];
+  updateCartUI();
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('successView').style.display = 'block';
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── 初始化 ──
+renderProducts();
+</script>
+</body>
+</html>
