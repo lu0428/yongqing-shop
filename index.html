@@ -375,6 +375,128 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* Product Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: rgba(0,0,0,0.15);
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      color: #333;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+    }
+    .modal-close:hover { background: rgba(0,0,0,0.25); }
+    .modal-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 16px 16px 0 0;
+    }
+    .modal-img-placeholder {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #e8f0e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      border-radius: 16px 16px 0 0;
+    }
+    .modal-body { padding: 20px; }
+    .modal-category {
+      font-size: 12px;
+      color: #3d6b4f;
+      background: #e8f4ec;
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .modal-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .modal-weight {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .modal-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 16px;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 14px;
+    }
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .modal-tag {
+      font-size: 12px;
+      background: #f5f5f5;
+      color: #666;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .modal-price-section { border-top: 1px solid #f0f0f0; padding-top: 16px; }
+    .modal-price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .modal-price-row + .modal-price-row { border-top: 1px solid #f5f5f5; }
+    .modal-price-label { font-size: 13px; color: #888; margin-bottom: 2px; }
+    .modal-price-value { font-size: 20px; font-weight: 700; color: #e05c3a; }
+    .modal-price-value.bundle { color: #3d6b4f; }
+    .modal-add-btn {
+      background: #3d6b4f;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .modal-add-btn:hover { background: #2c5038; }
+
     /* Responsive */
     @media (max-width: 480px) {
       .cart-panel { width: 100%; }
@@ -477,6 +599,14 @@
         <button class="submit-btn" onclick="closeOrderForm()">關閉</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleModalOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeProduct()">✕</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
@@ -685,6 +815,62 @@ let cart = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
+// ── 商品詳情 Modal ──
+function openProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+
+  const imgHtml = p.image
+    ? `<img class="modal-img" src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="modal-img-placeholder" style="display:none">🌿</div>`
+    : `<div class="modal-img-placeholder">🌿</div>`;
+
+  const tagsHtml = p.tags.map(t => `<span class="modal-tag">#${t}</span>`).join('');
+
+  const priceHtml = p.inStock ? `
+    <div class="modal-price-section">
+      <div class="modal-price-row">
+        <div>
+          <div class="modal-price-label">單包</div>
+          <div class="modal-price-value">$${p.price}</div>
+        </div>
+        <button class="modal-add-btn" onclick="addToCart('${p.id}','single');closeProduct()">加入購物車</button>
+      </div>
+      ${p.priceBundle ? `
+      <div class="modal-price-row">
+        <div>
+          <div class="modal-price-label">${p.bundleDesc}</div>
+          <div class="modal-price-value bundle">$${p.priceBundle}</div>
+        </div>
+        <button class="modal-add-btn" onclick="addToCart('${p.id}','bundle');closeProduct()">加入購物車</button>
+      </div>` : ''}
+    </div>` : `<div style="margin-top:16px"><span class="out-badge">已售完</span></div>`;
+
+  document.getElementById('modalContent').innerHTML = `
+    ${imgHtml}
+    <div class="modal-body">
+      <div class="modal-category">${p.category}</div>
+      <div class="modal-name">${p.name}</div>
+      ${p.weight ? `<div class="modal-weight">📦 ${p.weight}</div>` : ''}
+      <div class="modal-desc">${p.description || ''}</div>
+      <div class="modal-tags">${tagsHtml}</div>
+      ${priceHtml}
+    </div>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProduct() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeProduct();
+}
+
 // ── 渲染商品 ──
 function renderProducts() {
   const grid = document.getElementById('productGrid');
@@ -700,7 +886,7 @@ function renderProducts() {
   document.getElementById('productCount').textContent = `共 ${filtered.length} 件`;
 
   grid.innerHTML = filtered.map(p => `
-    <div class="card ${p.inStock ? '' : 'out-of-stock'}" onclick="addToCart('${p.id}')">
+    <div class="card ${p.inStock ? '' : 'out-of-stock'}" onclick="openProduct('${p.id}')">
       ${p.image
         ? `<img class="card-img" src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         : ''}
