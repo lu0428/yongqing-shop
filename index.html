@@ -375,6 +375,60 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* Carousel */
+    .carousel { position: relative; overflow: hidden; border-radius: 16px 16px 0 0; }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.4s ease;
+      will-change: transform;
+    }
+    .carousel-slide { min-width: 100%; }
+    .carousel-slide img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+    .carousel-slide .modal-img-placeholder {
+      border-radius: 0;
+      aspect-ratio: 1;
+    }
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 5;
+    }
+    .carousel-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid rgba(255,255,255,0.8);
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .carousel-dot.active { background: white; }
+    .carousel-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.3);
+      border: none; color: white;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 5;
+      transition: background 0.2s;
+    }
+    .carousel-btn:hover { background: rgba(0,0,0,0.55); }
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+
     /* Product Modal */
     .modal-overlay {
       display: none;
@@ -772,6 +826,7 @@ const products = [
     weight: '20顆/盒',
     description: '左旋肉鹼、綠茶素複方。針對游泳圈族群、肉鬆一族，加強雕塑、勁窕緊實。有效提升燃脂效率，讓身材更緊實有型。',
     image: 'images/中西藥局/cw002.jpg',
+    images: ['images/中西藥局/cw002.jpg', 'images/中西藥局/cw002_3.jpg', 'images/中西藥局/cw002_2.jpg'],
     inStock: true,
     tags: ['左旋肉鹼', '雕塑', '緊實', '燃脂']
   },
@@ -816,14 +871,16 @@ let currentFilter = 'all';
 let currentSearch = '';
 
 // ── 商品詳情 Modal ──
+let _slideTimer = null;
+let _slideIndex = 0;
+let _slideImages = [];
+
 function openProduct(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
 
-  const imgHtml = p.image
-    ? `<img class="modal-img" src="${p.image}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-       <div class="modal-img-placeholder" style="display:none">🌿</div>`
-    : `<div class="modal-img-placeholder">🌿</div>`;
+  _slideImages = p.images || (p.image ? [p.image] : []);
+  _slideIndex = 0;
 
   const tagsHtml = p.tags.map(t => `<span class="modal-tag">#${t}</span>`).join('');
 
@@ -846,8 +903,34 @@ function openProduct(id) {
       </div>` : ''}
     </div>` : `<div style="margin-top:16px"><span class="out-badge">已售完</span></div>`;
 
+  // 輪播圖區塊
+  let carouselHtml;
+  if (_slideImages.length > 1) {
+    const slides = _slideImages.map((src, i) => `
+      <div class="carousel-slide">
+        <img src="${src}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="modal-img-placeholder" style="display:none">🌿</div>
+      </div>`).join('');
+    const dots = _slideImages.map((_, i) =>
+      `<button class="carousel-dot ${i===0?'active':''}" onclick="goSlide(${i})"></button>`).join('');
+    carouselHtml = `
+      <div class="carousel" id="carousel">
+        <div class="carousel-track" id="carouselTrack">${slides}</div>
+        <button class="carousel-btn prev" onclick="prevSlide()">‹</button>
+        <button class="carousel-btn next" onclick="nextSlide()">›</button>
+        <div class="carousel-dots" id="carouselDots">${dots}</div>
+      </div>`;
+  } else if (_slideImages.length === 1) {
+    carouselHtml = `
+      <img class="modal-img" src="${_slideImages[0]}" alt="${p.name}"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="modal-img-placeholder" style="display:none">🌿</div>`;
+  } else {
+    carouselHtml = `<div class="modal-img-placeholder">🌿</div>`;
+  }
+
   document.getElementById('modalContent').innerHTML = `
-    ${imgHtml}
+    ${carouselHtml}
     <div class="modal-body">
       <div class="modal-category">${p.category}</div>
       <div class="modal-name">${p.name}</div>
@@ -860,9 +943,43 @@ function openProduct(id) {
 
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // 自動輪播（多張圖時啟動）
+  if (_slideImages.length > 1) {
+    clearInterval(_slideTimer);
+    _slideTimer = setInterval(() => nextSlide(), 5000);
+  }
+}
+
+function updateCarousel() {
+  const track = document.getElementById('carouselTrack');
+  if (track) track.style.transform = `translateX(-${_slideIndex * 100}%)`;
+  const dots = document.querySelectorAll('.carousel-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === _slideIndex));
+}
+
+function goSlide(idx) {
+  _slideIndex = idx;
+  updateCarousel();
+  clearInterval(_slideTimer);
+  _slideTimer = setInterval(() => nextSlide(), 5000);
+}
+
+function nextSlide() {
+  _slideIndex = (_slideIndex + 1) % _slideImages.length;
+  updateCarousel();
+}
+
+function prevSlide() {
+  _slideIndex = (_slideIndex - 1 + _slideImages.length) % _slideImages.length;
+  updateCarousel();
+  clearInterval(_slideTimer);
+  _slideTimer = setInterval(() => nextSlide(), 5000);
 }
 
 function closeProduct() {
+  clearInterval(_slideTimer);
+  _slideTimer = null;
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
