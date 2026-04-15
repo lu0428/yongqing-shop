@@ -581,7 +581,7 @@
   <button class="filter-btn" onclick="filterCategory('即飲包', this)">即飲包</button>
   <button class="filter-btn" onclick="filterCategory('漢方足浴包', this)">漢方足浴包</button>
   <button class="filter-btn" onclick="filterCategory('食品調味料', this)">食品調味料</button>
-  <button class="filter-btn" onclick="filterCategory('外用保健', this)">外用保健</button>
+  <button class="filter-btn" onclick="filterCategory('外用漢方產品', this)">外用漢方產品</button>
   <input class="search-box" type="text" placeholder="搜尋商品…" oninput="searchProducts(this.value)">
 </div>
 
@@ -781,7 +781,7 @@ const products = [
   {
     id: 'cw005',
     name: '輕濕 洛神纖美飲',
-    category: '窈窕有感',
+    category: '即飲包',
     price: 35,
     weight: '1包',
     description: '漢方草本纖美飲品。降火氣、趕走沉盤、還原輕盈、促進新陳代謝，天天輕盈好輕鬆。洛神花為主體，搭配多種漢方草本，美麗由內而外。',
@@ -902,9 +902,9 @@ const products = [
   { id: 'lp001', name: '秘製香滷包', category: '食品調味料', price: 20, description: '秘製香料配方滷包，滷肉必備好滋味', image: 'images/中西藥局/lp002.jpg', inStock: true, tags: ['滷包', '滷肉', '香料'] },
   { id: 'lp002', name: '經典香滷包', category: '食品調味料', price: 20, description: '經典香料配方滷包，傳統正宗好口味', image: 'images/中西藥局/lp001.jpg', inStock: true, tags: ['滷包', '經典', '香料'] },
 
-  // ── 外用保健：驅蚊包 ──
-  { id: 'ms001', name: '純漢方 驅蚊包', category: '外用保健', price: 30, weight: '20g/包', description: '純漢方草本驅蚊，天然無化學添加', image: '', inStock: true, tags: ['驅蚊', '漢方', '天然'] },
-  { id: 'ms002', name: '純漢方 清香防蚊包', category: '外用保健', price: 30, weight: '20g/包', description: '純漢方清香防蚊包，天然植物配方', image: '', inStock: true, tags: ['防蚊', '漢方', '清香'] }
+  // ── 外用漢方產品：驅蚊包 ──
+  { id: 'ms001', name: '純漢方 驅蚊包', category: '外用漢方產品', price: 30, weight: '20g/包', description: '純漢方草本驅蚊，天然無化學添加', image: '', inStock: true, tags: ['驅蚊', '漢方', '天然'] },
+  { id: 'ms002', name: '純漢方 清香防蚊包', category: '外用漢方產品', price: 30, weight: '20g/包', description: '純漢方清香防蚊包，天然植物配方', image: '', inStock: true, tags: ['防蚊', '漢方', '清香'] }
 ];
 
 // ── 狀態 ──
