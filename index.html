@@ -576,13 +576,12 @@
 <div class="filter-bar">
   <span class="filter-label">分類</span>
   <button class="filter-btn active" onclick="filterCategory('all', this)">全部</button>
-  <button class="filter-btn" onclick="filterCategory('漢方足浴包', this)">漢方足浴包</button>
-  <button class="filter-btn" onclick="filterCategory('藥膳燉湯包', this)">藥膳燉湯包</button>
-  <button class="filter-btn" onclick="filterCategory('養生茶飲', this)">養生茶飲</button>
-  <button class="filter-btn" onclick="filterCategory('初戀系果乾', this)">初戀系果乾</button>
-  <button class="filter-btn" onclick="filterCategory('外用保健', this)">外用保健</button>
-  <button class="filter-btn" onclick="filterCategory('食品調味料', this)">食品調味料</button>
   <button class="filter-btn" onclick="filterCategory('窈窕有感', this)">窈窕有感</button>
+  <button class="filter-btn" onclick="filterCategory('養生茶飲', this)">養生茶飲</button>
+  <button class="filter-btn" onclick="filterCategory('即飲包', this)">即飲包</button>
+  <button class="filter-btn" onclick="filterCategory('漢方足浴包', this)">漢方足浴包</button>
+  <button class="filter-btn" onclick="filterCategory('食品調味料', this)">食品調味料</button>
+  <button class="filter-btn" onclick="filterCategory('外用保健', this)">外用保健</button>
   <input class="search-box" type="text" placeholder="搜尋商品…" oninput="searchProducts(this.value)">
 </div>
 
@@ -795,10 +794,8 @@ const products = [
     id: 'hf041',
     name: '梳絡通透夜好眠足浴包',
     category: '漢方足浴包',
-    price: 34,
-    priceBundle: 162,
-    bundleDesc: '10入/袋',
-    weight: '10克/包',
+    price: 130,
+    weight: '10入/袋',
     description: '桂皮、澤蘭、紅花、艾草、仲筋草，舒緩放鬆、消除疲勞、緩助入睡',
     image: 'images/漢方/hf041.jpg',
     inStock: true,
@@ -808,10 +805,8 @@ const products = [
     id: 'hf042',
     name: '月月溫順好心情足浴包',
     category: '漢方足浴包',
-    price: 34,
-    priceBundle: 162,
-    bundleDesc: '10入/袋',
-    weight: '10克/包',
+    price: 130,
+    weight: '10入/袋',
     description: '益母草、丹蔘、川芎、紅玫瑰、澤蘭、薑片，促進代謝、紅潤養顏',
     image: 'images/漢方/hf042.jpg',
     inStock: true,
@@ -821,10 +816,8 @@ const products = [
     id: 'hf043',
     name: '溫潤暖身大風草足浴包',
     category: '漢方足浴包',
-    price: 34,
-    priceBundle: 162,
-    bundleDesc: '10入/袋',
-    weight: '15克/包',
+    price: 130,
+    weight: '10入/袋（15g/包）',
     description: '大風草、艾葉、香茅、薑片、桂枝，手腳暖和、產後進補、女性調養',
     image: 'images/漢方/hf043.jpg',
     inStock: true,
@@ -834,15 +827,86 @@ const products = [
     id: 'hf044',
     name: '無濕窈窕好輕盈足浴包',
     category: '漢方足浴包',
-    price: 34,
-    priceBundle: 162,
-    bundleDesc: '10入/袋',
-    weight: '10克/包',
+    price: 130,
+    weight: '10入/袋',
     description: '荷葉、蒲公英、香茅、迷迭香、薑片，輕盈代謝、舒緩窈窕',
     image: 'images/漢方/hf044.jpg',
     inStock: true,
     tags: ['足浴', '輕盈', '代謝']
-  }
+  },
+
+  // ── 養生茶飲：甘味人生 ──
+  { id: 'ht001', name: '枸杞菊花茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '甘味人生系列，護肝明目、清熱降火', image: '', inStock: true, tags: ['菊花', '枸杞', '護肝', '清熱'] },
+  { id: 'ht002', name: '薑黃 代謝好甘美', category: '養生茶飲', price: 130, weight: '8入/袋', description: '甘味人生系列，薑黃促進代謝、暖胃養生', image: '', inStock: true, tags: ['薑黃', '代謝', '暖胃'] },
+  { id: 'ht003', name: '七葉膽茶', category: '養生茶飲', price: 130, weight: '10入/袋', description: '甘味人生系列，降火消暑、清熱解毒', image: '', inStock: true, tags: ['七葉膽', '清熱', '降火'] },
+  { id: 'ht004', name: '活力養生茶', category: '養生茶飲', price: 110, weight: '8入/袋', description: '甘味人生系列，補充元氣、活力滿滿', image: '', inStock: true, tags: ['活力', '補氣', '養生'] },
+  { id: 'ht005', name: '沁涼銀花茶', category: '養生茶飲', price: 80, weight: '7入/袋', description: '甘味人生系列，銀花清熱解毒、消暑降火', image: '', inStock: true, tags: ['銀花', '清熱', '消暑'] },
+
+  // ── 養生茶飲：窈窕順暢 ──
+  { id: 'ht006', name: '加強舒暢油切茶', category: '養生茶飲', price: 90, weight: '8入/袋', description: '窈窕順暢系列，加強版油切配方、輕盈無負擔', image: '', inStock: true, tags: ['油切', '舒暢', '代謝'] },
+  { id: 'ht007', name: '油切山茶', category: '養生茶飲', price: 90, weight: '6入/袋', description: '窈窕順暢系列，油切輕盈、幫助代謝', image: '', inStock: true, tags: ['油切', '山茶', '代謝'] },
+  { id: 'ht008', name: '美纖茶', category: '養生茶飲', price: 100, weight: '10入/袋', description: '窈窕順暢系列，纖細窈窕、促進代謝', image: '', inStock: true, tags: ['纖細', '窈窕', '代謝'] },
+  { id: 'ht009', name: '順暢油切綠茶', category: '養生茶飲', price: 80, weight: '10入/袋', description: '窈窕順暢系列，清爽綠茶油切配方', image: '', inStock: true, tags: ['油切', '綠茶', '順暢'] },
+  { id: 'ht010', name: '杜仲代謝纖盈茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '窈窕順暢系列，杜仲加持、代謝纖盈', image: '', inStock: true, tags: ['杜仲', '代謝', '纖盈'] },
+
+  // ── 養生茶飲：除濕纖姿 ──
+  { id: 'ht011', name: '除濕輕盈茶', category: '養生茶飲', price: 80, weight: '8入/袋', description: '除濕纖姿系列，去濕排水、輕盈體態', image: '', inStock: true, tags: ['除濕', '輕盈', '排水'] },
+  { id: 'ht012', name: '除濕牛蒡茶', category: '養生茶飲', price: 80, weight: '8入/袋', description: '除濕纖姿系列，牛蒡去濕、清腸排毒', image: '', inStock: true, tags: ['除濕', '牛蒡', '清腸'] },
+  { id: 'ht013', name: '蘋果山楂茶', category: '養生茶飲', price: 80, weight: '7入/袋', description: '除濕纖姿系列，蘋果山楂酸甜爽口、助消化', image: '', inStock: true, tags: ['山楂', '蘋果', '消化'] },
+  { id: 'ht014', name: '赤豆薏涼茶', category: '養生茶飲', price: 80, weight: '10入/袋', description: '除濕纖姿系列，赤豆薏仁去濕利水', image: '', inStock: true, tags: ['赤豆', '薏仁', '去濕'] },
+
+  // ── 養生茶飲：輕鬆好眠 ──
+  { id: 'ht015', name: '周公舒眠茶', category: '養生茶飲', price: 120, weight: '10入/袋', description: '輕鬆好眠系列，天然草本安神助眠', image: '', inStock: true, tags: ['助眠', '安神', '舒壓'] },
+  { id: 'ht016', name: '衛管舒壓 康福茶', category: '養生茶飲', price: 130, weight: '10入/袋', description: '輕鬆好眠系列，舒壓養神、調節身心', image: '', inStock: true, tags: ['舒壓', '養神', '康福'] },
+  { id: 'ht017', name: '刺五加 蓮子心草茶', category: '養生茶飲', price: 130, weight: '8入/袋', description: '輕鬆好眠系列，刺五加安神、蓮子心清心', image: '', inStock: true, tags: ['刺五加', '蓮子', '安神'] },
+
+  // ── 養生茶飲：元氣養聲 ──
+  { id: 'ht018', name: '響聲潤喉茶', category: '養生茶飲', price: 110, weight: '7入/袋', description: '元氣養聲系列，潤喉養聲、清咽利嗓', image: '', inStock: true, tags: ['潤喉', '養聲', '清咽'] },
+  { id: 'ht019', name: '養聲清淳茶', category: '養生茶飲', price: 80, weight: '10入/袋', description: '元氣養聲系列，清淳養聲、保護咽喉', image: '', inStock: true, tags: ['養聲', '清淳', '咽喉'] },
+
+  // ── 養生茶飲：補益強身 ──
+  { id: 'ht020', name: '元氣養身茶', category: '養生茶飲', price: 80, weight: '10入/袋', description: '補益強身系列，補充元氣、強身健體', image: '', inStock: true, tags: ['元氣', '養身', '強身'] },
+  { id: 'ht021', name: '青春杜仲茶', category: '養生茶飲', price: 100, weight: '10入/袋', description: '補益強身系列，杜仲補腎、強腰健骨', image: '', inStock: true, tags: ['杜仲', '補腎', '強身'] },
+  { id: 'ht022', name: '美精入眠草本茶', category: '養生茶飲', price: 150, weight: '7入/袋', description: '補益強身系列，草本精華助眠安神', image: '', inStock: true, tags: ['草本', '助眠', '安神'] },
+  { id: 'ht023', name: '瑪卡人蔘 帝王茶', category: '養生茶飲', price: 150, weight: '7入/袋', description: '補益強身系列，瑪卡人蔘雙效補益', image: '', inStock: true, tags: ['瑪卡', '人蔘', '補益'] },
+  { id: 'ht024', name: '天參 聰明茶', category: '養生茶飲', price: 150, weight: '7入/袋', description: '補益強身系列，補腦益智、提神醒腦', image: '', inStock: true, tags: ['天參', '補腦', '益智'] },
+  { id: 'ht025', name: '氣氛 參麥茶', category: '養生茶飲', price: 150, weight: '7入/袋', description: '補益強身系列，人參麥冬補氣滋陰', image: '', inStock: true, tags: ['參麥', '補氣', '滋陰'] },
+
+  // ── 養生茶飲：通暢護新 ──
+  { id: 'ht026', name: '代謝明 明日葉茶', category: '養生茶飲', price: 130, weight: '8入/袋', description: '通暢護新系列，明日葉促進代謝、排毒護肝', image: '', inStock: true, tags: ['明日葉', '代謝', '護肝'] },
+  { id: 'ht027', name: '護肝三味茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '通暢護新系列，三味草本護肝養身', image: '', inStock: true, tags: ['護肝', '草本', '養身'] },
+  { id: 'ht028', name: '養生杜仲葉茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '通暢護新系列，杜仲葉養生調理', image: '', inStock: true, tags: ['杜仲', '養生', '調理'] },
+  { id: 'ht029', name: '山苦瓜 七葉膽茶', category: '養生茶飲', price: 130, weight: '8入/袋', description: '通暢護新系列，山苦瓜七葉膽清熱降火', image: '', inStock: true, tags: ['山苦瓜', '七葉膽', '清熱'] },
+  { id: 'ht030', name: '桑葉茶', category: '養生茶飲', price: 100, weight: '6入/袋', description: '通暢護新系列，桑葉清熱、調節血糖', image: '', inStock: true, tags: ['桑葉', '清熱', '調節'] },
+
+  // ── 養生茶飲：補益養顏 ──
+  { id: 'ht031', name: '玫瑰山楂茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '補益養顏系列，玫瑰美顏、山楂助消化', image: '', inStock: true, tags: ['玫瑰', '山楂', '美顏'] },
+  { id: 'ht032', name: '美人生化茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '補益養顏系列，生化調理、紅潤好氣色', image: '', inStock: true, tags: ['生化', '調理', '養顏'] },
+  { id: 'ht033', name: '美人孕將茶', category: '養生茶飲', price: 130, weight: '7入/袋', description: '補益養顏系列，滋補養顏、適合孕前調理', image: '', inStock: true, tags: ['孕前', '調理', '養顏'] },
+  { id: 'ht034', name: '活顏玫瑰茶', category: '養生茶飲', price: 100, weight: '7入/袋', description: '補益養顏系列，玫瑰活顏、氣色紅潤', image: '', inStock: true, tags: ['玫瑰', '活顏', '氣色'] },
+  { id: 'ht035', name: '亮顏鑽石紅棗茶', category: '養生茶飲', price: 80, weight: '7入/袋', description: '補益養顏系列，紅棗補血、亮顏美膚', image: '', inStock: true, tags: ['紅棗', '補血', '亮顏'] },
+  { id: 'ht036', name: '黑糖老薑 桂圓紅棗茶', category: '養生茶飲', price: 80, weight: '7入/袋', description: '補益養顏系列，黑糖薑茶暖身補血', image: '', inStock: true, tags: ['黑糖', '薑', '桂圓', '紅棗'] },
+
+  // ── 即飲包 ──
+  { id: 'jy001', name: '清涼退火 青草茶', category: '即飲包', price: 35, description: '清涼退火、消暑解渴', image: '', inStock: true, tags: ['青草茶', '退火', '清涼'] },
+  { id: 'jy002', name: '元氣四物飲', category: '即飲包', price: 40, description: '四物精華、補血補氣', image: '', inStock: true, tags: ['四物', '補血', '補氣'] },
+  { id: 'jy003', name: '葛根 豐盈四物飲', category: '即飲包', price: 50, description: '葛根四物複方、豐盈補益', image: '', inStock: true, tags: ['葛根', '四物', '豐盈'] },
+  { id: 'jy004', name: '美人生化飲', category: '即飲包', price: 40, description: '生化調理、紅潤養顏即飲包', image: '', inStock: true, tags: ['生化', '調理', '養顏'] },
+  { id: 'jy005', name: '氣氛 參麥飲', category: '即飲包', price: 55, description: '人參麥冬補氣滋陰即飲包', image: '', inStock: true, tags: ['參麥', '補氣', '即飲'] },
+  { id: 'jy006', name: '除濕 洛神纖美飲', category: '即飲包', price: 35, description: '洛神花去濕纖美即飲包', image: '', inStock: true, tags: ['洛神', '除濕', '纖美'] },
+  { id: 'jy007', name: '釘地蛺蝶草 即飲包', category: '即飲包', price: 70, description: '釘地蛺蝶草草本即飲配方', image: '', inStock: true, tags: ['蛺蝶草', '即飲', '草本'] },
+  { id: 'jy008', name: '轉骨女方', category: '即飲包', price: 60, description: '女性轉骨調理即飲包', image: '', inStock: true, tags: ['轉骨', '女性', '調理'] },
+  { id: 'jy009', name: '轉骨男方', category: '即飲包', price: 60, description: '男性轉骨強身即飲包', image: '', inStock: true, tags: ['轉骨', '男性', '強身'] },
+  { id: 'jy010', name: '百合參瓜減敏湯', category: '即飲包', price: 80, description: '百合人參瓜蒌複方、清肺減敏', image: '', inStock: true, tags: ['百合', '減敏', '清肺'] },
+  { id: 'jy011', name: '強身安迪飲', category: '即飲包', price: 35, description: '強身補益安迪即飲包', image: '', inStock: true, tags: ['強身', '補益', '即飲'] },
+
+  // ── 食品調味料：滷包 ──
+  { id: 'lp001', name: '秘製香滷包', category: '食品調味料', price: 20, description: '秘製香料配方滷包，滷肉必備好滋味', image: '', inStock: true, tags: ['滷包', '滷肉', '香料'] },
+  { id: 'lp002', name: '經典香滷包', category: '食品調味料', price: 20, description: '經典香料配方滷包，傳統正宗好口味', image: '', inStock: true, tags: ['滷包', '經典', '香料'] },
+
+  // ── 外用保健：驅蚊包 ──
+  { id: 'ms001', name: '純漢方 驅蚊包', category: '外用保健', price: 30, weight: '20g/包', description: '純漢方草本驅蚊，天然無化學添加', image: '', inStock: true, tags: ['驅蚊', '漢方', '天然'] },
+  { id: 'ms002', name: '純漢方 清香防蚊包', category: '外用保健', price: 30, weight: '20g/包', description: '純漢方清香防蚊包，天然植物配方', image: '', inStock: true, tags: ['防蚊', '漢方', '清香'] }
 ];
 
 // ── 狀態 ──
