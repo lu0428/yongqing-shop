@@ -623,17 +623,14 @@
         <input type="tel" id="fPhone" placeholder="0912-345-678">
       </div>
       <div class="form-group">
-        <label>寄送地址 *</label>
-        <input type="text" id="fAddress" placeholder="縣市＋鄉鎮＋詳細地址">
+        <label>7-11門市 *</label>
+        <input type="text" id="fAddress" placeholder="請填寫取件的 7-11 門市名稱與地址">
       </div>
       <div class="form-group">
         <label>付款方式</label>
-        <select id="fPayment" onchange="togglePaymentNote()">
+        <select id="fPayment">
           <option value="transfer">銀行轉帳</option>
-          <option value="linepay">LINE Pay</option>
-          <option value="applepay">Apple Pay</option>
         </select>
-        <div id="applePayNote" style="display:none;margin-top:6px;font-size:12px;color:#888;">訂單確認後，我們將傳送 Apple Pay 付款連結給您</div>
       </div>
       <div class="form-group">
         <label>備註</label>
@@ -669,6 +666,79 @@
 <script>
 // ── 商品資料（直接嵌入，後續可改為 fetch JSON）──
 const products = [
+  {
+    id: 'cw001',
+    name: '草本減重基本配方',
+    category: '窈窕有感',
+    price: 990,
+    priceBundle: 2800,
+    bundleDesc: '30天療程',
+    weight: '10天療程',
+    description: '天然草本配方，雕塑體態、促進代謝、調整體質。適用排便不順、愛吃油炸燙粉、三餐外食、生活忙碌、愛漂亮者。有效燃燒脂肪、提高代謝、降體重、雕塑身材。天然草本，有效、無副作用。',
+    image: 'images/中西藥局/cw001.jpg',
+    inStock: true,
+    tags: ['減重', '燃脂', '代謝', '草本', '產後調理']
+  },
+  {
+    id: 'cw006',
+    name: '草本減重加強配方',
+    category: '窈窕有感',
+    price: 1500,
+    priceBundle: 4000,
+    bundleDesc: '30天療程',
+    weight: '10天療程',
+    description: '草本減重複合加強配方，成分更豐富、功效更全面。有效燃燒脂肪、加速代謝、降體重、雕塑身材，適合追求更快、更顯著效果者。天然草本，有效、無副作用。',
+    image: '',
+    inStock: true,
+    tags: ['減重', '加強配方', '燃脂', '代謝', '草本']
+  },
+  {
+    id: 'cw002',
+    name: '纖姿肉鹼錠',
+    category: '窈窕有感',
+    price: 250,
+    weight: '20顆/盒',
+    description: '左旋肉鹼、綠茶素複方。針對游泳圈族群、肉鬆一族，加強雕塑、勁窕緊實。有效提升燃脂效率，讓身材更緊實有型。',
+    image: 'images/中西藥局/cw002.jpg',
+    images: ['images/中西藥局/cw002.jpg', 'images/中西藥局/cw002_3.jpg', 'images/中西藥局/cw002_2.jpg'],
+    inStock: true,
+    tags: ['左旋肉鹼', '雕塑', '緊實', '燃脂']
+  },
+  {
+    id: 'cw003',
+    name: '綠茶膠囊',
+    category: '窈窕有感',
+    price: 299,
+    weight: '20顆/盒',
+    description: '綠茶萃取物（含EGCG）、瓜拿那萃取物複方膠囊。專為天天外食者設計，促進新陳代謝、健康維持。超燃油切配方。',
+    image: 'images/中西藥局/cw003.jpg',
+    images: ['images/中西藥局/cw003.jpg', 'images/中西藥局/cw003_2.jpg', 'images/中西藥局/cw003_3.jpg'],
+    inStock: true,
+    tags: ['綠茶', 'EGCG', '代謝', '油切', '外食族']
+  },
+  {
+    id: 'cw004',
+    name: '倍佳 順暢酵素錠',
+    category: '窈窕有感',
+    price: 630,
+    weight: '60粒/瓶',
+    description: '專利蔬果酵素、專利乳果寡糖黃金比例配方。有靜感、舒暢感、輕鬆感、美窈感，體內環保，輕鬆腸暢，健康淨空。奶素可食。',
+    image: 'images/中西藥局/cw004.jpg',
+    inStock: true,
+    tags: ['酵素', '腸道保健', '排便順暢', '奶素']
+  },
+  {
+    id: 'cw005',
+    name: '輕濕 洛神纖美飲',
+    category: '窈窕有感',
+    price: 50,
+    weight: '1包',
+    description: '漢方草本纖美飲品。降火氣、趕走沉盤、還原輕盈、促進新陳代謝，天天輕盈好輕鬆。洛神花為主體，搭配多種漢方草本，美麗由內而外。',
+    image: 'images/中西藥局/cw005.jpg',
+    images: ['images/中西藥局/cw005.jpg', 'images/中西藥局/cw005_2.jpg'],
+    inStock: true,
+    tags: ['洛神', '去濕', '代謝', '輕盈', '漢方']
+  },
   {
     id: 'hf001',
     name: '仙楂餅・粒 仙梅粒 600g',
@@ -804,79 +874,6 @@ const products = [
     image: 'images/漢方/hf044.jpg',
     inStock: true,
     tags: ['足浴', '輕盈', '代謝']
-  },
-  {
-    id: 'cw001',
-    name: '草本減重基本配方',
-    category: '窈窕有感',
-    price: 990,
-    priceBundle: 2800,
-    bundleDesc: '30天療程',
-    weight: '10天療程',
-    description: '天然草本配方，雕塑體態、促進代謝、調整體質。適用排便不順、愛吃油炸燙粉、三餐外食、生活忙碌、愛漂亮者。有效燃燒脂肪、提高代謝、降體重、雕塑身材。天然草本，有效、無副作用。',
-    image: 'images/中西藥局/cw001.jpg',
-    inStock: true,
-    tags: ['減重', '燃脂', '代謝', '草本', '產後調理']
-  },
-  {
-    id: 'cw006',
-    name: '草本減重加強配方',
-    category: '窈窕有感',
-    price: 1500,
-    priceBundle: 4000,
-    bundleDesc: '30天療程',
-    weight: '10天療程',
-    description: '草本減重複合加強配方，成分更豐富、功效更全面。有效燃燒脂肪、加速代謝、降體重、雕塑身材，適合追求更快、更顯著效果者。天然草本，有效、無副作用。',
-    image: '',
-    inStock: true,
-    tags: ['減重', '加強配方', '燃脂', '代謝', '草本']
-  },
-  {
-    id: 'cw002',
-    name: '纖姿肉鹼錠',
-    category: '窈窕有感',
-    price: 250,
-    weight: '20顆/盒',
-    description: '左旋肉鹼、綠茶素複方。針對游泳圈族群、肉鬆一族，加強雕塑、勁窕緊實。有效提升燃脂效率，讓身材更緊實有型。',
-    image: 'images/中西藥局/cw002.jpg',
-    images: ['images/中西藥局/cw002.jpg', 'images/中西藥局/cw002_3.jpg', 'images/中西藥局/cw002_2.jpg'],
-    inStock: true,
-    tags: ['左旋肉鹼', '雕塑', '緊實', '燃脂']
-  },
-  {
-    id: 'cw003',
-    name: '綠茶膠囊',
-    category: '窈窕有感',
-    price: 299,
-    weight: '20顆/盒',
-    description: '綠茶萃取物（含EGCG）、瓜拿那萃取物複方膠囊。專為天天外食者設計，促進新陳代謝、健康維持。超燃油切配方。',
-    image: 'images/中西藥局/cw003.jpg',
-    images: ['images/中西藥局/cw003.jpg', 'images/中西藥局/cw003_2.jpg', 'images/中西藥局/cw003_3.jpg'],
-    inStock: true,
-    tags: ['綠茶', 'EGCG', '代謝', '油切', '外食族']
-  },
-  {
-    id: 'cw004',
-    name: '倍佳 順暢酵素錠',
-    category: '窈窕有感',
-    price: 630,
-    weight: '60粒/瓶',
-    description: '專利蔬果酵素、專利乳果寡糖黃金比例配方。有靜感、舒暢感、輕鬆感、美窈感，體內環保，輕鬆腸暢，健康淨空。奶素可食。',
-    image: 'images/中西藥局/cw004.jpg',
-    inStock: true,
-    tags: ['酵素', '腸道保健', '排便順暢', '奶素']
-  },
-  {
-    id: 'cw005',
-    name: '輕濕 洛神纖美飲',
-    category: '窈窕有感',
-    price: 50,
-    weight: '1包',
-    description: '漢方草本纖美飲品。降火氣、趕走沉盤、還原輕盈、促進新陳代謝，天天輕盈好輕鬆。洛神花為主體，搭配多種漢方草本，美麗由內而外。',
-    image: 'images/中西藥局/cw005.jpg',
-    images: ['images/中西藥局/cw005.jpg', 'images/中西藥局/cw005_2.jpg'],
-    inStock: true,
-    tags: ['洛神', '去濕', '代謝', '輕盈', '漢方']
   }
 ];
 
@@ -1176,7 +1173,7 @@ async function submitOrder() {
     return;
   }
 
-  const paymentMap = { transfer: '銀行轉帳', linepay: 'LINE Pay', applepay: 'Apple Pay' };
+  const paymentMap = { transfer: '銀行轉帳' };
   const paymentVal = document.getElementById('fPayment').value;
   const itemsText = cart.map(i => {
     const label = i.type === 'bundle' ? `${i.name}（${i.bundleDesc || '整組'}）` : i.name;
