@@ -664,6 +664,10 @@
 
 <script>
 // ── 商品資料（直接嵌入，後續可改為 fetch JSON）──
+// ── 團購主識別 ──
+const urlParams = new URLSearchParams(window.location.search);
+const currentTeam = urlParams.get('team') || 'default';
+
 const products = [
   {
     id: 'cw001',
@@ -1221,7 +1225,8 @@ async function submitOrder() {
     payment: paymentMap[paymentVal] || paymentVal,
     items: itemsText,
     total,
-    note: document.getElementById('fNote').value.trim()
+    note: document.getElementById('fNote').value.trim(),
+    team: currentTeam
   };
 
   try {
