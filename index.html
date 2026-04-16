@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JunHsu團購網頁</title>
+  <title id="pageTitle">JunHsu團購網頁</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -564,7 +564,7 @@
 
 <!-- Header -->
 <header>
-  <div class="logo">
+  <div class="logo" id="logoText">
     JunHsu團購網頁
   </div>
   <button class="cart-btn" onclick="openCart()">
@@ -667,6 +667,11 @@
 // ── 團購主識別 ──
 const urlParams = new URLSearchParams(window.location.search);
 const currentTeam = urlParams.get('team') || 'JunHsu';
+
+// 動態更新頁面標題
+const teamTitle = `${currentTeam}團購網頁`;
+document.title = teamTitle;
+document.getElementById('logoText').textContent = teamTitle;
 
 const products = [
   {
