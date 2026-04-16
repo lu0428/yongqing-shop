@@ -673,6 +673,7 @@ const products = [
     weight: '10天療程',
     description: '天然草本配方，雕塑體態、促進代謝、調整體質。適用排便不順、愛吃油炸燙粉、三餐外食、生活忙碌、愛漂亮者。有效燃燒脂肪、提高代謝、降體重、雕塑身材。天然草本，有效、無副作用。',
     image: 'images/中西藥局/cw001.jpg',
+    singleLabel: '一份',
     inStock: true,
     tags: ['減重', '燃脂', '代謝', '草本', '產後調理']
   },
@@ -684,6 +685,7 @@ const products = [
     weight: '10天療程',
     description: '草本減重複合加強配方，成分更豐富、功效更全面。有效燃燒脂肪、加速代謝、降體重、雕塑身材，適合追求更快、更顯著效果者。天然草本，有效、無副作用。',
     image: 'images/中西藥局/cw006.jpg',
+    singleLabel: '一份',
     inStock: true,
     tags: ['減重', '加強配方', '燃脂', '代謝', '草本']
   },
@@ -930,7 +932,7 @@ function openProduct(id) {
     <div class="modal-price-section">
       <div class="modal-price-row">
         <div>
-          <div class="modal-price-label">單包</div>
+          <div class="modal-price-label">${p.singleLabel || '單包'}</div>
           <div class="modal-price-value">$${p.price}</div>
         </div>
         <button class="modal-add-btn" onclick="addToCart('${p.id}','single');closeProduct()">加入購物車</button>
@@ -1059,7 +1061,7 @@ function renderProducts() {
         <div class="card-price-section">
           <div class="price-row">
             <div>
-              <div class="price-label">單包</div>
+              <div class="price-label">${p.singleLabel || '單包'}</div>
               <div class="price-value">$${p.price}</div>
             </div>
             <button class="add-btn" onclick="event.stopPropagation();addToCart('${p.id}','single')">加入</button>
@@ -1098,7 +1100,7 @@ function addToCart(id, type = 'single') {
   const cartId = `${id}_${type}`;
   const isBundle = type === 'bundle';
   const price = isBundle ? p.priceBundle : p.price;
-  const label = isBundle ? p.bundleDesc : '單包';
+  const label = isBundle ? p.bundleDesc : (p.singleLabel || '單包');
   const existing = cart.find(x => x.cartId === cartId);
   if (existing) {
     existing.qty++;
