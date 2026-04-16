@@ -666,7 +666,12 @@
 // ── 商品資料（直接嵌入，後續可改為 fetch JSON）──
 // ── 團購主識別 ──
 const urlParams = new URLSearchParams(window.location.search);
-const currentTeam = urlParams.get('team') || 'JunHsu';
+let currentTeam = urlParams.get('team') || 'JunHsu';
+
+// 解碼中文參數（以防編碼問題）
+try {
+  currentTeam = decodeURIComponent(currentTeam);
+} catch (e) {}
 
 // 動態更新頁面標題
 const teamTitle = `${currentTeam}團購網頁`;
