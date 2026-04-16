@@ -930,7 +930,7 @@ function openProduct(id) {
     <div class="modal-price-section">
       <div class="modal-price-row">
         <div>
-          <div class="modal-price-label">單包</div>
+          <div class="modal-price-label">一份</div>
           <div class="modal-price-value">$${p.price}</div>
         </div>
         <button class="modal-add-btn" onclick="addToCart('${p.id}','single');closeProduct()">加入購物車</button>
@@ -1059,7 +1059,7 @@ function renderProducts() {
         <div class="card-price-section">
           <div class="price-row">
             <div>
-              <div class="price-label">單包</div>
+              <div class="price-label">一份</div>
               <div class="price-value">$${p.price}</div>
             </div>
             <button class="add-btn" onclick="event.stopPropagation();addToCart('${p.id}','single')">加入</button>
@@ -1098,7 +1098,7 @@ function addToCart(id, type = 'single') {
   const cartId = `${id}_${type}`;
   const isBundle = type === 'bundle';
   const price = isBundle ? p.priceBundle : p.price;
-  const label = isBundle ? p.bundleDesc : '單包';
+  const label = isBundle ? p.bundleDesc : '一份';
   const existing = cart.find(x => x.cartId === cartId);
   if (existing) {
     existing.qty++;
