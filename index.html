@@ -572,6 +572,21 @@
   </button>
 </header>
 
+<script>
+// 立即更新標題（在 DOM 準備好後執行）
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  let team = urlParams.get('team') || 'JunHsu';
+  try {
+    team = decodeURIComponent(team);
+  } catch (e) {}
+  const title = `${team}團購網頁`;
+  document.title = title;
+  const logoEl = document.getElementById('logoText');
+  if (logoEl) logoEl.textContent = title;
+})();
+</script>
+
 <!-- Filter bar -->
 <div class="filter-bar">
   <span class="filter-label">分類</span>
