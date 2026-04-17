@@ -572,34 +572,6 @@
   </button>
 </header>
 
-<script>
-// 立即更新標題（在 DOM 準備好後執行）
-(function() {
-  // 簡短代碼對應表
-  const teamMap = {
-    'junhsu': 'JunHsu',
-    'shuntian': '順天宮',
-    'kk': 'KK'
-  };
-
-  const urlParams = new URLSearchParams(window.location.search);
-  let team = urlParams.get('team') || 'JunHsu';
-  try {
-    team = decodeURIComponent(team);
-  } catch (e) {}
-
-  // 如果是簡短代碼，轉換為完整名稱
-  if (teamMap[team.toLowerCase()]) {
-    team = teamMap[team.toLowerCase()];
-  }
-
-  const title = `${team}團購網頁`;
-  document.title = title;
-  const logoEl = document.getElementById('logoText');
-  if (logoEl) logoEl.textContent = title;
-})();
-</script>
-
 <!-- Filter bar -->
 <div class="filter-bar">
   <span class="filter-label">分類</span>
@@ -700,6 +672,18 @@ let currentTeam = urlParams.get('team') || 'JunHsu';
 try {
   currentTeam = decodeURIComponent(currentTeam);
 } catch (e) {}
+
+// 簡短代碼對應表
+const teamMap = {
+  'junhsu': 'JunHsu',
+  'shuntian': '順天宮',
+  'kk': 'KK'
+};
+
+// 如果是簡短代碼，轉換為完整名稱
+if (teamMap[currentTeam.toLowerCase()]) {
+  currentTeam = teamMap[currentTeam.toLowerCase()];
+}
 
 // 動態更新頁面標題
 const teamTitle = `${currentTeam}團購網頁`;
