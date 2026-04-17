@@ -3,7 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- 動態設置 Open Graph 標籤（用於 LINE、Facebook 等社交媒體預覽） -->
+  <script>
+    (function() {
+      const teamMap = {
+        'junhsu': 'JunHsu',
+        'shuntian': '順天宮',
+        'kk': 'KK'
+      };
+      const urlParams = new URLSearchParams(window.location.search);
+      let team = urlParams.get('team') || 'JunHsu';
+      try { team = decodeURIComponent(team); } catch (e) {}
+      if (teamMap[team.toLowerCase()]) { team = teamMap[team.toLowerCase()]; }
+
+      const title = `${team}團購網頁`;
+      document.title = title;
+
+      // 動態更新 Open Graph 標籤
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
+      ogTitle.setAttribute('content', title);
+    })();
+  </script>
+
   <title id="pageTitle">JunHsu團購網頁</title>
+  <meta property="og:title" content="JunHsu團購網頁" />
+  <meta property="og:description" content="永青養生館團購網頁" />
+  <meta property="og:type" content="website" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
