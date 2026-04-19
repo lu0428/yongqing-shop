@@ -77,6 +77,127 @@
       justify-content: center;
       margin-left: 4px;
     }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .orders-btn {
+      background: white;
+      color: #3d6b4f;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .orders-btn:hover { background: #f5f1ea; }
+
+    /* Orders modal */
+    .orders-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .orders-overlay.open { display: block; }
+    .orders-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 92%;
+      max-width: 960px;
+      max-height: 85vh;
+      background: white;
+      border-radius: 16px;
+      z-index: 1001;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .orders-modal.open { display: flex; }
+    .orders-header {
+      background: #3d6b4f;
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .orders-title { font-size: 16px; font-weight: 700; }
+    .orders-close {
+      background: transparent;
+      color: white;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    .orders-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+    .orders-loading, .orders-empty, .orders-error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+      font-size: 14px;
+    }
+    .orders-error { color: #c0392b; }
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .orders-table th {
+      background: #f5f1ea;
+      color: #3d6b4f;
+      font-weight: 700;
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 2px solid #e8e0d5;
+      position: sticky;
+      top: 0;
+    }
+    .orders-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f0ebe3;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .orders-table tr:hover td { background: #fafaf5; }
+    .orders-table .col-items { min-width: 200px; white-space: pre-line; }
+    .orders-table .col-address { min-width: 160px; }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-preparing { background: #fff3cd; color: #8a6d00; }
+    .status-shipped   { background: #d4ebff; color: #0a558a; }
+    .status-other     { background: #ececec; color: #555; }
+    @media (max-width: 720px) {
+      .orders-table thead { display: none; }
+      .orders-table, .orders-table tbody, .orders-table tr, .orders-table td { display: block; width: 100%; }
+      .orders-table tr {
+        border: 1px solid #e8e0d5;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 8px;
+      }
+      .orders-table td {
+        border: none;
+        padding: 4px 0;
+      }
+      .orders-table td::before {
+        content: attr(data-label) "：";
+        font-weight: 700;
+        color: #3d6b4f;
+      }
+    }
 
     /* Filter bar */
     .filter-bar {
@@ -594,10 +715,27 @@
   <div class="logo" id="logoText">
     JunHsu團購網頁
   </div>
-  <button class="cart-btn" onclick="openCart()">
-    🛒 購物車 <span class="cart-count" id="cartCount">0</span>
-  </button>
+  <div class="header-actions">
+    <button class="orders-btn" onclick="toggleOrdersView()">
+      📋 查看訂單
+    </button>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 購物車 <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
 </header>
+
+<!-- Orders Modal -->
+<div class="orders-overlay" id="ordersOverlay" onclick="toggleOrdersView()"></div>
+<div class="orders-modal" id="ordersModal">
+  <div class="orders-header">
+    <div class="orders-title">📋 <span id="ordersTeamLabel"></span> 訂單清單</div>
+    <button class="orders-close" onclick="toggleOrdersView()">✕</button>
+  </div>
+  <div class="orders-body" id="ordersBody">
+    <div class="orders-loading">載入中…</div>
+  </div>
+</div>
 
 <!-- Filter bar -->
 <div class="filter-bar">
@@ -690,35 +828,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 商品資料（直接嵌入，後續可改為 fetch JSON）──
 // ── 團購主識別 ──
 const urlParams = new URLSearchParams(window.location.search);
-let currentTeam = urlParams.get('team') || 'JunHsu';
+let rawTeamParam = urlParams.get('team') || 'junhsu';
+try { rawTeamParam = decodeURIComponent(rawTeamParam).toLowerCase(); } catch (e) {}
 
-// 解碼中文參數（以防編碼問題）
-try {
-  currentTeam = decodeURIComponent(currentTeam);
-} catch (e) {}
-
-// 簡短代碼對應表
-const teamMap = {
-  'junhsu': 'JunHsu',
-  'shuntian': '順天宮',
-  'kk': 'KK'
-};
-
-// 如果是簡短代碼，轉換為完整名稱
-if (teamMap[currentTeam.toLowerCase()]) {
-  currentTeam = teamMap[currentTeam.toLowerCase()];
-}
-
-// 動態更新頁面標題
-const teamTitle = `${currentTeam}團購網頁`;
-document.title = teamTitle;
-document.getElementById('logoText').textContent = teamTitle;
+// currentTeam 先用原始值，initPage() 解析後會更新
+let currentTeam = rawTeamParam;
 
 // ── Google Apps Script 端點 ──
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDsT-KL-Em_3oGfPgoIOuOW8UvU2j-DSdpE0T6_R2w4y2lTPrmoM5Fy799CJfQEzpyPg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyr3WnPjkP1ivKGc98V0j5Xdy8hI3L48Xkm4FdrX3yHMo2cHRMiSVTQgs_aqp3EmcFapw/exec';
 
 // ── 團購主可售商品管理 ──
 let allowedProductIds = new Set(); // 該團購主可以賣的商品 ID
@@ -1346,8 +1465,103 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ── 初始化 ──
-loadAllowedProducts(); // 載入該團購主的商品清單，載入完後會自動 renderProducts()
+// ── 查看訂單 ──
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function statusBadgeClass(status) {
+  var s = String(status || '').trim();
+  if (s === '準備中') return 'status-preparing';
+  if (s === '已出貨') return 'status-shipped';
+  return 'status-other';
+}
+
+function renderOrdersTable(orders) {
+  if (!orders.length) {
+    return '<div class="orders-empty">目前還沒有訂單</div>';
+  }
+  var rows = orders.map(function (o) {
+    var status = o.status || '—';
+    return '<tr>'
+      + '<td data-label="姓名">' + escapeHtml(o.name) + '</td>'
+      + '<td data-label="手機">' + escapeHtml(o.phone) + '</td>'
+      + '<td data-label="地址" class="col-address">' + escapeHtml(o.address) + '</td>'
+      + '<td data-label="商品明細" class="col-items">' + escapeHtml(o.items) + '</td>'
+      + '<td data-label="訂單狀況"><span class="status-badge ' + statusBadgeClass(status) + '">' + escapeHtml(status) + '</span></td>'
+      + '</tr>';
+  }).join('');
+  return '<table class="orders-table">'
+    + '<thead><tr><th>姓名</th><th>手機</th><th>地址</th><th>商品明細</th><th>訂單狀況</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table>';
+}
+
+async function loadTeamOrders() {
+  var body = document.getElementById('ordersBody');
+  body.innerHTML = '<div class="orders-loading">載入中…</div>';
+  try {
+    var url = APPS_SCRIPT_URL + '?action=getOrders&team=' + encodeURIComponent(currentTeam);
+    var resp = await fetch(url);
+    var data = await resp.json();
+    if (data && data.status === 'error') {
+      body.innerHTML = '<div class="orders-error">載入失敗：' + escapeHtml(data.message) + '</div>';
+      return;
+    }
+    body.innerHTML = renderOrdersTable(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error('載入訂單失敗', e);
+    body.innerHTML = '<div class="orders-error">載入訂單失敗，請稍後再試</div>';
+  }
+}
+
+function toggleOrdersView() {
+  var overlay = document.getElementById('ordersOverlay');
+  var modal = document.getElementById('ordersModal');
+  var isOpen = modal.classList.contains('open');
+  if (isOpen) {
+    modal.classList.remove('open');
+    overlay.classList.remove('open');
+  } else {
+    document.getElementById('ordersTeamLabel').textContent = currentTeam;
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    loadTeamOrders();
+  }
+}
+
+// ── 初始化：先從 Sheet 拉取團購主對照表，再載入商品 ──
+async function initPage() {
+  // 內建備援，避免 API 失敗時頁面空白
+  const fallbackMap = { 'junhsu': 'JunHsu', 'shuntian': '順天宮', 'kk': 'KK' };
+
+  try {
+    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
+    const teams = await resp.json();
+
+    if (Array.isArray(teams)) {
+      const teamMap = {};
+      teams.forEach(t => {
+        if (t && t.param && t.name) teamMap[t.param.toLowerCase()] = t.name;
+      });
+      if (teamMap[rawTeamParam]) currentTeam = teamMap[rawTeamParam];
+    }
+  } catch (e) {
+    console.error('載入團購主設定失敗，使用備援對照表', e);
+    if (fallbackMap[rawTeamParam]) currentTeam = fallbackMap[rawTeamParam];
+  }
+
+  // 更新標題
+  const teamTitle = `${currentTeam}團購網頁`;
+  document.title = teamTitle;
+  document.getElementById('logoText').textContent = teamTitle;
+
+  // 載入商品
+  await loadAllowedProducts();
+}
+
+initPage();
 </script>
 </body>
 </html>
