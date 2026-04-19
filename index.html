@@ -1484,7 +1484,7 @@ function statusBadgeClass(status) {
 
 function paymentBadgeClass(payment) {
   var s = String(payment || '').trim();
-  if (s === '未收款') return 'payment-unpaid';
+  if (s === '確認收款中') return 'payment-unpaid';
   if (s === '已收款') return 'payment-paid';
   return 'payment-other';
 }
