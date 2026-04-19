@@ -52,7 +52,7 @@ function doPost(e) {
     // 金額欄格式 + 整列黃色背景
     var lastRow = sheet.getLastRow();
     sheet.getRange(lastRow, 7).setNumberFormat('$#,##0');
-    sheet.getRange(lastRow, 1, 1, 10).setBackground('#FFFF00'); // 新訂單黃色背景
+    sheet.getRange(lastRow, 1, 1, 11).setBackground('#FFFF00'); // 新訂單黃色背景
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok' }))
@@ -180,8 +180,9 @@ function getOrdersByTeam(team) {
       orders.push({
         name:    row[1] || '',   // B 欄：姓名
         phone:   row[2] || '',   // C 欄：手機
-        address: row[3] || '',   // D 欄:  地址
+        address: row[3] || '',   // D 欄：地址
         items:   row[5] || '',   // F 欄：商品明細
+        payment: row[9] || '',   // J 欄：確認是否收款
         status:  row[10] || ''   // K 欄：訂單狀況
       });
     }

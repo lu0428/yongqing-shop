@@ -179,6 +179,9 @@
     .status-preparing { background: #fff3cd; color: #8a6d00; }
     .status-shipped   { background: #d4ebff; color: #0a558a; }
     .status-other     { background: #ececec; color: #555; }
+    .payment-unpaid   { background: #ffe0e0; color: #b00020; }
+    .payment-paid     { background: #d4f7e0; color: #1a6b3a; }
+    .payment-other    { background: #ececec; color: #555; }
     @media (max-width: 720px) {
       .orders-table thead { display: none; }
       .orders-table, .orders-table tbody, .orders-table tr, .orders-table td { display: block; width: 100%; }
@@ -1479,22 +1482,31 @@ function statusBadgeClass(status) {
   return 'status-other';
 }
 
+function paymentBadgeClass(payment) {
+  var s = String(payment || '').trim();
+  if (s === '未收款') return 'payment-unpaid';
+  if (s === '已收款') return 'payment-paid';
+  return 'payment-other';
+}
+
 function renderOrdersTable(orders) {
   if (!orders.length) {
     return '<div class="orders-empty">目前還沒有訂單</div>';
   }
   var rows = orders.map(function (o) {
     var status = o.status || '—';
+    var payment = o.payment || '—';
     return '<tr>'
       + '<td data-label="姓名">' + escapeHtml(o.name) + '</td>'
       + '<td data-label="手機">' + escapeHtml(o.phone) + '</td>'
-      + '<td data-label="地址" class="col-address">' + escapeHtml(o.address) + '</td>'
+      + '<td data-label="7-11門市" class="col-address">' + escapeHtml(o.address) + '</td>'
       + '<td data-label="商品明細" class="col-items">' + escapeHtml(o.items) + '</td>'
+      + '<td data-label="確認是否收款"><span class="status-badge ' + paymentBadgeClass(payment) + '">' + escapeHtml(payment) + '</span></td>'
       + '<td data-label="訂單狀況"><span class="status-badge ' + statusBadgeClass(status) + '">' + escapeHtml(status) + '</span></td>'
       + '</tr>';
   }).join('');
   return '<table class="orders-table">'
-    + '<thead><tr><th>姓名</th><th>手機</th><th>7-11門市</th><th>商品明細</th><th>訂單狀況</th></tr></thead>'
+    + '<thead><tr><th>姓名</th><th>手機</th><th>7-11門市</th><th>商品明細</th><th>確認是否收款</th><th>訂單狀況</th></tr></thead>'
     + '<tbody>' + rows + '</tbody></table>';
 }
 
