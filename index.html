@@ -1563,5 +1563,29 @@ async function initPage() {
 
 initPage();
 </script>
+
+<!-- ★★★ 新增：訂單查詢模態框 -->
+<div id="ordersModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; padding: 20px; overflow-y: auto;">
+  <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 24px; animation: modalIn 0.2s ease;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="font-size: 18px; font-weight: 700; color: #3d6b4f; margin: 0;">📋 訂單列表</h2>
+      <button onclick="closeOrdersModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999; padding: 0;">✕</button>
+    </div>
+    <div id="ordersContainer" style="max-height: 60vh; overflow-y: auto;">
+      <div style="padding: 40px; text-align: center; color: #999;">
+        <p style="font-size: 32px; margin-bottom: 12px;">⏳</p>
+        <p style="font-size: 14px;">載入訂單中…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>
+
 </body>
 </html>
