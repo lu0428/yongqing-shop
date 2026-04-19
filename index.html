@@ -1384,7 +1384,7 @@ async function loadTeamOrders() {
     let html = '';
     orders.forEach((order, idx) => {
       const statusColor = order.status === '已出貨' ? '#d1ecf1' : '#fff3cd';
-      const statusText = order.status === '已出貨' ? '✓ 已出貨' : '⏳ 待確認';
+      const statusText = order.status === '已出貨' ? '✓ 已出貨' : ('⏳ ' + (order.status || '準備中'));
       const statusTextColor = order.status === '已出貨' ? '#0c5460' : '#856404';
       
       html += '<div style="border: 1px solid #e8e0d5; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: #faf8f5;">';
