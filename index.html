@@ -594,9 +594,14 @@
   <div class="logo" id="logoText">
     JunHsu團購網頁
   </div>
-  <button class="cart-btn" onclick="openCart()">
-    🛒 購物車 <span class="cart-count" id="cartCount">0</span>
-  </button>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <button class="cart-btn" onclick="openCart()">
+      🛒 購物車 <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="cart-btn" id="ordersBtn" onclick="toggleOrdersView()" style="background: white; color: #3d6b4f; border: 2px solid #3d6b4f;">
+      📋 查看訂單
+    </button>
+  </div>
 </header>
 
 <!-- Filter bar -->
@@ -1348,6 +1353,99 @@ function showToast(msg) {
 
 // ── 初始化 ──
 loadAllowedProducts(); // 載入該團購主的商品清單，載入完後會自動 renderProducts()
+
+// ── 訂單查詢 ──
+function toggleOrdersView() {
+  const modal = document.getElementById('ordersModal');
+  if (modal.style.display === 'none' || !modal.style.display) {
+    modal.style.display = 'block';
+    loadTeamOrders();
+  } else {
+    modal.style.display = 'none';
+  }
+}
+
+function closeOrdersModal() {
+  document.getElementById('ordersModal').style.display = 'none';
+}
+
+// 從 Google Sheets 拉取該團購主的訂單
+async function loadTeamOrders() {
+  try {
+    const response = await fetch(APPS_SCRIPT_URL + '?action=getOrders&team=' + encodeURIComponent(currentTeam));
+    const orders = await response.json();
+    
+    const container = document.getElementById('ordersContainer');
+    if (!orders || orders.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: #999;"><p style="font-size: 32px; margin-bottom: 12px;">📋</p><p>目前沒有訂單</p></div>';
+      return;
+    }
+    
+    let html = '';
+    orders.forEach((order, idx) => {
+      const statusColor = order.status === '已出貨' ? '#d1ecf1' : '#fff3cd';
+      const statusText = order.status === '已出貨' ? '✓ 已出貨' : '⏳ 待確認';
+      const statusTextColor = order.status === '已出貨' ? '#0c5460' : '#856404';
+      
+      html += '<div style="border: 1px solid #e8e0d5; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: #faf8f5;">';
+      html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e8e0d5;">';
+      html += '<div style="font-weight: 700; color: #3d6b4f; font-size: 16px;">訂單 #' + (order.id || idx) + '</div>';
+      html += '<div style="background: ' + statusColor + '; color: ' + statusTextColor + '; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">' + statusText + '</div>';
+      html += '</div>';
+      html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; font-size: 13px;">';
+      html += '<div><span style="color: #888; font-size: 11px;">👤 訂購者</span><br><strong>' + (order.name || '') + '</strong></div>';
+      html += '<div><span style="color: #888; font-size: 11px;">📞 電話</span><br><strong>' + (order.phone || '') + '</strong></div>';
+      html += '<div><span style="color: #888; font-size: 11px;">📍 取貨地點</span><br><strong>' + (order.address || '') + '</strong></div>';
+      html += '<div><span style="color: #888; font-size: 11px;">💳 付款方式</span><br><strong>' + (order.payment || '') + '</strong></div>';
+      html += '</div>';
+      html += '<div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">';
+      html += '<div style="font-size: 13px; color: #555;">' + (order.items || '') + '</div>';
+      html += '</div>';
+      html += '<div style="text-align: right; font-size: 16px; font-weight: 700; color: #3d6b4f;">💰 總金額：$' + (order.total || 0) + '</div>';
+      html += '</div>';
+    });
+    
+    container.innerHTML = html;
+  } catch (e) {
+    console.error('載入訂單失敗', e);
+    document.getElementById('ordersContainer').innerHTML = '<div style="padding: 40px; text-align: center; color: #e05c3a;"><p>載入訂單失敗，請稍後重試</p></div>';
+  }
+}
+
+// 點擊背景關閉訂單模態框
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('ordersModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) closeOrdersModal();
+    });
+  }
+});
+
 </script>
+
+<!-- ★★★ 新增：訂單查詢模態框 -->
+<div id="ordersModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; padding: 20px; overflow-y: auto;">
+  <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 24px; animation: modalIn 0.2s ease;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="font-size: 18px; font-weight: 700; color: #3d6b4f; margin: 0;">📋 訂單列表</h2>
+      <button onclick="closeOrdersModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999; padding: 0;">✕</button>
+    </div>
+    <div id="ordersContainer" style="max-height: 60vh; overflow-y: auto;">
+      <div style="padding: 40px; text-align: center; color: #999;">
+        <p style="font-size: 32px; margin-bottom: 12px;">⏳</p>
+        <p style="font-size: 14px;">載入訂單中…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>
+
 </body>
 </html>
