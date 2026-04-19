@@ -132,6 +132,29 @@
       cursor: pointer;
       padding: 0 4px;
     }
+    .orders-filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      border-bottom: 1px solid #e8e0d5;
+      flex-wrap: wrap;
+    }
+    .orders-search {
+      flex: 1;
+      min-width: 140px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .orders-select {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #fff;
+      cursor: pointer;
+    }
     .orders-body {
       flex: 1;
       overflow-y: auto;
@@ -735,6 +758,19 @@
     <div class="orders-title">📋 <span id="ordersTeamLabel"></span> 訂單清單</div>
     <button class="orders-close" onclick="toggleOrdersView()">✕</button>
   </div>
+  <div class="orders-filter-bar">
+    <input class="orders-search" type="text" id="ordersSearch" placeholder="搜尋姓名或手機…" oninput="filterOrders()">
+    <select class="orders-select" id="ordersPaymentFilter" onchange="filterOrders()">
+      <option value="">全部收款狀態</option>
+      <option value="確認收款中">確認收款中</option>
+      <option value="已收款">已收款</option>
+    </select>
+    <select class="orders-select" id="ordersStatusFilter" onchange="filterOrders()">
+      <option value="">全部訂單狀況</option>
+      <option value="準備中">準備中</option>
+      <option value="已出貨">已出貨</option>
+    </select>
+  </div>
   <div class="orders-body" id="ordersBody">
     <div class="orders-loading">載入中…</div>
   </div>
@@ -1332,7 +1368,12 @@ function addToCart(id, type = 'single') {
   showToast(`✅ 已加入「${p.name}」${label}`);
 }
 
+function saveCart() {
+  try { localStorage.setItem('cart_' + currentTeam, JSON.stringify(cart)); } catch(e) {}
+}
+
 function updateCartUI() {
+  saveCart();
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
   document.getElementById('cartCount').textContent = cart.reduce((s, x) => s + x.qty, 0);
   document.getElementById('cartTotal').textContent = `$${total}`;
@@ -1455,6 +1496,7 @@ async function submitOrder() {
   }
 
   cart = [];
+  try { localStorage.removeItem('cart_' + currentTeam); } catch(e) {}
   updateCartUI();
   document.getElementById('formView').style.display = 'none';
   document.getElementById('successView').style.display = 'block';
@@ -1511,6 +1553,8 @@ function renderOrdersTable(orders) {
     + '<tbody>' + rows + '</tbody></table>';
 }
 
+var allOrders = [];
+
 async function loadTeamOrders() {
   var body = document.getElementById('ordersBody');
   body.innerHTML = '<div class="orders-loading">載入中…</div>';
@@ -1522,11 +1566,29 @@ async function loadTeamOrders() {
       body.innerHTML = '<div class="orders-error">載入失敗：' + escapeHtml(data.message) + '</div>';
       return;
     }
-    body.innerHTML = renderOrdersTable(Array.isArray(data) ? data : []);
+    allOrders = Array.isArray(data) ? data : [];
+    filterOrders();
   } catch (e) {
     console.error('載入訂單失敗', e);
     body.innerHTML = '<div class="orders-error">載入訂單失敗，請稍後再試</div>';
   }
+}
+
+function filterOrders() {
+  var keyword = (document.getElementById('ordersSearch').value || '').trim().toLowerCase();
+  var payFilter = document.getElementById('ordersPaymentFilter').value;
+  var statusFilter = document.getElementById('ordersStatusFilter').value;
+
+  var filtered = allOrders.filter(function(o) {
+    var matchKeyword = !keyword ||
+      String(o.name || '').toLowerCase().includes(keyword) ||
+      String(o.phone || '').includes(keyword);
+    var matchPayment = !payFilter || String(o.payment || '') === payFilter;
+    var matchStatus  = !statusFilter || String(o.status || '') === statusFilter;
+    return matchKeyword && matchPayment && matchStatus;
+  });
+
+  document.getElementById('ordersBody').innerHTML = renderOrdersTable(filtered);
 }
 
 function toggleOrdersView() {
@@ -1569,6 +1631,12 @@ async function initPage() {
   const teamTitle = `${currentTeam}團購網頁`;
   document.title = teamTitle;
   document.getElementById('logoText').textContent = teamTitle;
+
+  // 還原購物車
+  try {
+    const saved = localStorage.getItem('cart_' + currentTeam);
+    if (saved) { cart = JSON.parse(saved); updateCartUI(); }
+  } catch(e) {}
 
   // 載入商品
   await loadAllowedProducts();
