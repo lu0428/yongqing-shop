@@ -46,7 +46,7 @@ function doPost(e) {
       data.total   || 0,
       data.note    || '',
       data.team    || 'default',
-      '確認是否收款'
+      '確認收款中'
     ]);
 
     // 金額欄格式 + 整列黃色背景
@@ -178,6 +178,7 @@ function getOrdersByTeam(team) {
       var row = data[r];
       if (String(row[teamColIndex]) !== String(team)) continue;
       orders.push({
+        time:    row[0] ? Utilities.formatDate(new Date(row[0]), 'Asia/Taipei', 'yyyy/MM/dd HH:mm') : '',
         name:    row[1] || '',   // B 欄：姓名
         phone:   row[2] || '',   // C 欄：手機
         address: row[3] || '',   // D 欄：地址
