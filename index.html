@@ -880,17 +880,21 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx75eH57zmr7GOT
 
 // ── 團購主可售商品管理 ──
 let allowedProductIds = new Set(); // 該團購主可以賣的商品 ID
+let productsApiLoaded = false;     // true = GAS 有正確回應；false = API 失敗（顯示全部作備援）
 
 async function loadAllowedProducts() {
   try {
     const response = await fetch(`${APPS_SCRIPT_URL}?team=${currentTeam}`);
     const data = await response.json();
-    allowedProductIds = new Set(data.map(p => p.id));
+    // 確保 ID 統一轉成字串，避免數字 vs 字串型別不吻合
+    allowedProductIds = new Set(data.map(p => String(p.id)));
+    productsApiLoaded = true;
     renderProducts(); // 重新渲染商品
     updateCategoryFilters(); // 動態更新分類按鈕
   } catch (e) {
-    console.error('載入商品清單失敗', e);
-    renderProducts(); // 失敗時仍然渲染（顯示所有商品）
+    console.error('載入商品清單失敗，顯示全部商品作為備援', e);
+    productsApiLoaded = false;
+    renderProducts(); // API 真正失敗時才顯示全部
   }
 }
 
@@ -1292,7 +1296,9 @@ function renderProducts() {
   const grid = document.getElementById('productGrid');
   const filtered = products.filter(p => {
     // 檢查該團購主是否可以賣這個商品
-    const canSell = allowedProductIds.size === 0 || allowedProductIds.has(p.id);
+    // API 失敗(productsApiLoaded=false) → 顯示全部備援
+    // API 成功(productsApiLoaded=true)  → 嚴格依 Sheet 設定過濾
+    const canSell = !productsApiLoaded || allowedProductIds.has(String(p.id));
     const matchCat = currentFilter === 'all' || p.category === currentFilter;
     const matchSearch = currentSearch === '' ||
       p.name.includes(currentSearch) ||
