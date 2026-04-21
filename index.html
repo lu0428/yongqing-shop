@@ -1610,6 +1610,7 @@ function toggleOrdersView() {
 async function initPage() {
   // 內建備援，避免 API 失敗時頁面空白
   const fallbackMap = { 'junhsu': 'JunHsu', 'shuntian': '順天宮', 'kk': 'KK' };
+  let isValidTeam = false;
 
   try {
     const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
@@ -1620,11 +1621,23 @@ async function initPage() {
       teams.forEach(t => {
         if (t && t.param && t.name) teamMap[t.param.toLowerCase()] = t.name;
       });
-      if (teamMap[rawTeamParam]) currentTeam = teamMap[rawTeamParam];
+      if (teamMap[rawTeamParam]) {
+        currentTeam = teamMap[rawTeamParam];
+        isValidTeam = true;
+      }
     }
   } catch (e) {
     console.error('載入團購主設定失敗，使用備援對照表', e);
-    if (fallbackMap[rawTeamParam]) currentTeam = fallbackMap[rawTeamParam];
+    if (fallbackMap[rawTeamParam]) {
+      currentTeam = fallbackMap[rawTeamParam];
+      isValidTeam = true;
+    }
+  }
+
+  // 非合法團購主 → 顯示封鎖畫面，停止載入
+  if (!isValidTeam) {
+    showInvalidTeamPage();
+    return;
   }
 
   // 更新標題
@@ -1640,6 +1653,21 @@ async function initPage() {
 
   // 載入商品
   await loadAllowedProducts();
+}
+
+function showInvalidTeamPage() {
+  document.title = '找不到此頁面';
+  document.body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                height:100vh;font-family:sans-serif;color:#555;text-align:center;padding:20px;">
+      <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#333;">找不到此團購頁面</h2>
+      <p style="font-size:14px;color:#888;line-height:1.8;">
+        您所訪問的團購頁面不存在或已停用。<br>
+        請確認網址是否正確，或聯繫相關人員取得正確連結。
+      </p>
+    </div>
+  `;
 }
 
 initPage();
