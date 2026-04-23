@@ -94,10 +94,10 @@ function doGet(e) {
     var data = productSheet.getDataRange().getValues();
     var headers = data[0];
 
-    // 找出對應團購主的欄位索引
+    // 找出對應團購主的欄位索引（統一轉字串比對，避免數字欄位不吻合）
     var teamColIndex = -1;
     for (var i = 0; i < headers.length; i++) {
-      if (headers[i] === team) {
+      if (String(headers[i]).trim() === String(team).trim()) {
         teamColIndex = i;
         break;
       }
@@ -110,23 +110,28 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 根據該欄位的 TRUE/FALSE，篩選商品
+    // 根據團購主欄位 TRUE/FALSE 篩選，回傳完整商品資料
     var allowedProducts = [];
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      var productId = row[0];
-      var productName = row[1];
-      var category = row[2];
       var canSell = row[teamColIndex];
+      if (canSell !== true) continue;
 
-      // 只有當該欄位是 TRUE 時才加入
-      if (canSell === true) {
-        allowedProducts.push({
-          id: productId,
-          name: productName,
-          category: category
-        });
-      }
+      // 標籤：逗號分隔字串 → 陣列
+      var tagsStr = String(row[7] || '');
+      var tags = tagsStr ? tagsStr.split(',').map(function(t) { return t.trim(); }) : [];
+
+      allowedProducts.push({
+        id:          'prod_' + (i + 1),       // 自動ID：第2列 = prod_2
+        name:        String(row[1] || ''),    // B：商品名稱
+        category:    String(row[2] || ''),    // C：分類
+        price:       Number(row[3]) || 0,     // D：價格
+        weight:      String(row[4] || ''),    // E：規格
+        description: String(row[5] || ''),    // F：描述
+        image:       String(row[6] || ''),    // G：圖片路徑
+        tags:        tags,                    // H：標籤
+        inStock:     row[8] === true          // I：庫存
+      });
     }
 
     return ContentService

@@ -879,23 +879,26 @@ let currentTeam = rawTeamParam;
 // ── Google Apps Script 端點 ──
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXotkvT5w8Eanp_3-N6z19O48ioeD6wD6DlBbttOGcu1oA_nh3-uMtDwhupJpmYZmouQ/exec';
 
-// ── 團購主可售商品管理 ──
-let allowedProductIds = new Set(); // 該團購主可以賣的商品 ID
-let productsApiLoaded = false;     // true = GAS 有正確回應；false = API 失敗（顯示全部作備援）
+// ── 商品動態載入（從 Google Sheet 讀取完整商品資料）──
+let productsApiLoaded = false;
 
-async function loadAllowedProducts() {
+async function loadProducts() {
   try {
     const response = await fetch(`${APPS_SCRIPT_URL}?team=${currentTeam}`);
     const data = await response.json();
-    // 確保 ID 統一轉成字串，避免數字 vs 字串型別不吻合
-    allowedProductIds = new Set(data.map(p => String(p.id)));
+    if (Array.isArray(data) && data.length > 0) {
+      products = data;
+    } else {
+      products = [];
+    }
     productsApiLoaded = true;
-    renderProducts(); // 重新渲染商品
-    updateCategoryFilters(); // 動態更新分類按鈕
+    renderProducts();
+    updateCategoryFilters();
   } catch (e) {
-    console.error('載入商品清單失敗，顯示全部商品作為備援', e);
+    console.error('載入商品清單失敗', e);
+    products = [];
     productsApiLoaded = false;
-    renderProducts(); // API 真正失敗時才顯示全部
+    renderProducts();
   }
 }
 
@@ -924,7 +927,7 @@ function updateCategoryFilters() {
   });
 }
 
-const products = [
+let products = [
   {
     id: 'cw001',
     name: '草本減重基本配方',
@@ -1195,7 +1198,7 @@ function openProduct(id) {
     <div class="modal-price-section">
       <div class="modal-price-row">
         <div>
-          <div class="modal-price-label">${p.singleLabel || '單包'}</div>
+          <div class="modal-price-label">${p.singleLabel || '一份'}</div>
           <div class="modal-price-value">$${p.price}</div>
         </div>
         <button class="modal-add-btn" onclick="addToCart('${p.id}','single');closeProduct()">加入購物車</button>
@@ -1300,15 +1303,12 @@ function renderProducts() {
   const grid = document.getElementById('productGrid');
   const filtered = products.filter(p => {
     // 檢查該團購主是否可以賣這個商品
-    // API 失敗(productsApiLoaded=false) → 顯示全部備援
-    // API 成功(productsApiLoaded=true)  → 嚴格依 Sheet 設定過濾
-    const canSell = !productsApiLoaded || allowedProductIds.has(String(p.id));
     const matchCat = currentFilter === 'all' || p.category === currentFilter;
     const matchSearch = currentSearch === '' ||
       p.name.includes(currentSearch) ||
       (p.description && p.description.includes(currentSearch)) ||
       p.tags.some(t => t.includes(currentSearch));
-    return canSell && matchCat && matchSearch;
+    return matchCat && matchSearch;
   });
 
   document.getElementById('productCount').textContent = `共 ${filtered.length} 件`;
@@ -1328,7 +1328,7 @@ function renderProducts() {
         <div class="card-price-section">
           <div class="price-row">
             <div>
-              <div class="price-label">${p.singleLabel || '單包'}</div>
+              <div class="price-label">${p.singleLabel || '一份'}</div>
               <div class="price-value">$${p.price}</div>
             </div>
             <button class="add-btn" onclick="event.stopPropagation();addToCart('${p.id}','single')">加入</button>
@@ -1367,7 +1367,7 @@ function addToCart(id, type = 'single') {
   const cartId = `${id}_${type}`;
   const isBundle = type === 'bundle';
   const price = isBundle ? p.priceBundle : p.price;
-  const label = isBundle ? p.bundleDesc : (p.singleLabel || '單包');
+  const label = isBundle ? p.bundleDesc : (p.singleLabel || '一份');
   const existing = cart.find(x => x.cartId === cartId);
   if (existing) {
     existing.qty++;
@@ -1662,7 +1662,7 @@ async function initPage() {
   } catch(e) {}
 
   // 載入商品
-  await loadAllowedProducts();
+  await loadProducts();
 }
 
 function showInvalidTeamPage() {
