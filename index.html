@@ -902,16 +902,14 @@ async function loadProducts() {
   }
 }
 
-// 根據允許的商品，動態更新分類按鈕的顯示狀態
+// 根據已載入的商品，動態更新分類按鈕的顯示狀態
 function updateCategoryFilters() {
   const categoryButtons = document.querySelectorAll('.filter-btn');
   const categories = new Set();
 
-  // 蒐集允許的商品中存在的所有分類
+  // GAS 已過濾好可售商品，直接蒐集分類即可
   products.forEach(p => {
-    if (allowedProductIds.has(p.id)) {
-      categories.add(p.category);
-    }
+    categories.add(p.category);
   });
 
   // 根據是否有允許的商品，顯示或隱藏分類按鈕
