@@ -779,14 +779,7 @@
 <!-- Filter bar -->
 <div class="filter-bar">
   <span class="filter-label">分類</span>
-  <button class="filter-btn active" onclick="filterCategory('all', this)">全部</button>
-  <button class="filter-btn" onclick="filterCategory('窈窕有感', this)">窈窕有感</button>
-  <button class="filter-btn" onclick="filterCategory('養生茶飲', this)">養生茶飲</button>
-  <button class="filter-btn" onclick="filterCategory('即飲包', this)">即飲包</button>
-  <button class="filter-btn" onclick="filterCategory('漢方足浴包', this)">漢方足浴包</button>
-  <button class="filter-btn" onclick="filterCategory('食品調味料', this)">食品調味料</button>
-  <button class="filter-btn" onclick="filterCategory('外用漢方產品', this)">外用漢方產品</button>
-  <button class="filter-btn" onclick="filterCategory('應酬', this)">應酬</button>
+  <button class="filter-btn filter-all active" onclick="filterCategory('all', this)">全部</button>
   <input class="search-box" type="text" placeholder="搜尋商品…" oninput="searchProducts(this.value)">
 </div>
 
@@ -904,24 +897,29 @@ async function loadProducts() {
 
 // 根據已載入的商品，動態更新分類按鈕的顯示狀態
 function updateCategoryFilters() {
-  const categoryButtons = document.querySelectorAll('.filter-btn');
-  const categories = new Set();
+  const filterBar = document.querySelector('.filter-bar');
+  const searchBox = filterBar.querySelector('.search-box');
 
-  // GAS 已過濾好可售商品，直接蒐集分類即可
+  // 收集所有分類（依商品出現順序，不重複）
+  const categories = [];
+  const seen = new Set();
   products.forEach(p => {
-    categories.add(p.category);
+    if (p.category && !seen.has(p.category)) {
+      seen.add(p.category);
+      categories.push(p.category);
+    }
   });
 
-  // 根據是否有允許的商品，顯示或隱藏分類按鈕
-  categoryButtons.forEach(btn => {
-    const category = btn.textContent.trim();
-    if (category === '全部') {
-      btn.style.display = 'inline-block'; // 全部按鈕永遠顯示
-    } else if (categories.has(category)) {
-      btn.style.display = 'inline-block'; // 有允許的商品就顯示
-    } else {
-      btn.style.display = 'none'; // 沒有允許的商品就隱藏
-    }
+  // 移除舊的分類按鈕（保留「全部」和搜尋框）
+  filterBar.querySelectorAll('.filter-btn:not(.filter-all)').forEach(btn => btn.remove());
+
+  // 動態新增分類按鈕（插在搜尋框前面）
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = cat;
+    btn.onclick = function() { filterCategory(cat, this); };
+    filterBar.insertBefore(btn, searchBox);
   });
 }
 
