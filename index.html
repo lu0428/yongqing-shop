@@ -1451,16 +1451,18 @@ async function initPage() {
   const fallbackMap = { 'junhsu': 'JunHsu', 'shuntian': '順天宮', 'kk': 'KK' };
   let isValidTeam = false;
 
-  // 先用快取，沒有快取才打 API
-  let teams = cacheGet('teams_cache_' + CACHE_VER, 10 * 60 * 1000); // 快取 10 分鐘
-  if (!teams) {
-    try {
-      const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
-      teams = await resp.json();
-      if (Array.isArray(teams)) cacheSet('teams_cache_' + CACHE_VER, teams);
-    } catch (e) {
-      console.error('載入團購主設定失敗，使用備援對照表', e);
+  // teams 永遠從 API 拿（不用快取），確保停用狀態即時生效
+  let teams = null;
+  try {
+    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
+    teams = await resp.json();
+    // 授權停用 → 立即顯示停用畫面
+    if (teams && teams.status === 'suspended') {
+      showSuspendedPage(teams.message);
+      return;
     }
+  } catch (e) {
+    console.error('載入團購主設定失敗，使用備援對照表', e);
   }
 
   if (Array.isArray(teams)) {
