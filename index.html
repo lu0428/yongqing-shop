@@ -743,6 +743,7 @@
     <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:#333;">請輸入密碼</h2>
     <p style="font-size:13px;color:#999;margin-bottom:20px;">此頁面設有專屬密碼保護</p>
     <input id="passwordInput" type="password" placeholder="請輸入密碼"
+      autocomplete="current-password"
       onkeydown="if(event.key==='Enter')verifyPassword()"
       style="width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;margin-bottom:10px;outline:none;">
     <div id="passwordError" style="display:none;color:#e53e3e;font-size:13px;margin-bottom:10px;">❌ 密碼錯誤，請再試一次</div>
