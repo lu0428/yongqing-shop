@@ -736,6 +736,21 @@
 </head>
 <body>
 
+<!-- 密碼驗證 Modal -->
+<div id="passwordOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:36px 28px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+    <div style="font-size:48px;margin-bottom:12px;">🔐</div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:#333;">請輸入密碼</h2>
+    <p style="font-size:13px;color:#999;margin-bottom:20px;">此頁面設有專屬密碼保護</p>
+    <input id="passwordInput" type="password" placeholder="請輸入密碼"
+      onkeydown="if(event.key==='Enter')verifyPassword()"
+      style="width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;margin-bottom:10px;outline:none;">
+    <div id="passwordError" style="display:none;color:#e53e3e;font-size:13px;margin-bottom:10px;">❌ 密碼錯誤，請再試一次</div>
+    <button onclick="verifyPassword()"
+      style="width:100%;padding:12px;background:#3d6b4f;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;letter-spacing:0.5px;">確認進入</button>
+  </div>
+</div>
+
 <!-- Header -->
 <header>
   <div class="logo" id="logoText">
@@ -872,15 +887,48 @@ let currentTeam = rawTeamParam;
 // ── Google Apps Script 端點 ──
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHOyY4zmtsJBumcEBGSlwy6XeKEoJekxC9EAh5HaczBHNIEYJPRZ3LsFt1274fKik3qw/exec';
 
+// ── 快取工具（sessionStorage + TTL）──
+function cacheGet(key, ttlMs) {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > ttlMs) return null;
+    return data;
+  } catch(e) { return null; }
+}
+function cacheSet(key, data) {
+  try { sessionStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch(e) {}
+}
+
+// ── 密碼相關 ──
+let teamPassword = '';
+let resolvePasswordPromise = null;
+
 // ── 商品動態載入（從 Google Sheet 讀取完整商品資料）──
 let productsApiLoaded = false;
 
 async function loadProducts() {
+  const cacheKey = 'products_' + currentTeam;
+  const cached = cacheGet(cacheKey, 5 * 60 * 1000); // 快取 5 分鐘
+  if (cached) {
+    products = cached;
+    productsApiLoaded = true;
+    renderProducts();
+    updateCategoryFilters();
+    fetchFreshProducts(); // 背景更新，不等待
+    return;
+  }
+  await fetchFreshProducts();
+}
+
+async function fetchFreshProducts() {
   try {
     const response = await fetch(`${APPS_SCRIPT_URL}?team=${currentTeam}`);
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) {
       products = data;
+      cacheSet('products_' + currentTeam, data);
     } else {
       products = [];
     }
@@ -889,9 +937,7 @@ async function loadProducts() {
     updateCategoryFilters();
   } catch (e) {
     console.error('載入商品清單失敗', e);
-    products = [];
-    productsApiLoaded = false;
-    renderProducts();
+    if (!productsApiLoaded) { products = []; renderProducts(); }
   }
 }
 
@@ -1215,7 +1261,11 @@ function togglePaymentNote() {
   document.getElementById('applePayNote').style.display = val === 'applepay' ? 'block' : 'none';
 }
 
+let isSubmitting = false;
+
 async function submitOrder() {
+  if (isSubmitting) return; // 防止重複送單
+
   const name = document.getElementById('fName').value.trim();
   const phone = document.getElementById('fPhone').value.trim();
   const address = document.getElementById('fAddress').value.trim();
@@ -1223,6 +1273,11 @@ async function submitOrder() {
     showToast('⚠️ 請填寫姓名、手機與地址');
     return;
   }
+
+  // 鎖定按鈕
+  isSubmitting = true;
+  const submitBtn = document.querySelector('.submit-btn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '送出中…'; }
 
   const paymentMap = { transfer: '銀行轉帳' };
   const paymentVal = document.getElementById('fPayment').value;
@@ -1251,8 +1306,10 @@ async function submitOrder() {
       body: JSON.stringify(orderData)
     });
   } catch (e) {
-    // 送出失敗仍顯示成功畫面（避免使用者重複送單）
     console.error('訂單送出失敗', e);
+  } finally {
+    isSubmitting = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '確認送出訂單'; }
   }
 
   cart = [];
@@ -1317,7 +1374,20 @@ var allOrders = [];
 
 async function loadTeamOrders() {
   var body = document.getElementById('ordersBody');
+  const cacheKey = 'orders_' + currentTeam;
+  const cached = cacheGet(cacheKey, 2 * 60 * 1000); // 快取 2 分鐘
+  if (cached) {
+    allOrders = cached;
+    filterOrders();
+    fetchFreshOrders(); // 背景更新
+    return;
+  }
   body.innerHTML = '<div class="orders-loading">載入中…</div>';
+  await fetchFreshOrders();
+}
+
+async function fetchFreshOrders() {
+  var body = document.getElementById('ordersBody');
   try {
     var url = APPS_SCRIPT_URL + '?action=getOrders&team=' + encodeURIComponent(currentTeam);
     var resp = await fetch(url);
@@ -1327,10 +1397,11 @@ async function loadTeamOrders() {
       return;
     }
     allOrders = Array.isArray(data) ? data : [];
+    cacheSet('orders_' + currentTeam, allOrders);
     filterOrders();
   } catch (e) {
     console.error('載入訂單失敗', e);
-    body.innerHTML = '<div class="orders-error">載入訂單失敗，請稍後再試</div>';
+    if (!allOrders.length) body.innerHTML = '<div class="orders-error">載入訂單失敗，請稍後再試</div>';
   }
 }
 
@@ -1368,36 +1439,49 @@ function toggleOrdersView() {
 
 // ── 初始化：先從 Sheet 拉取團購主對照表，再載入商品 ──
 async function initPage() {
-  // 內建備援，避免 API 失敗時頁面空白
   const fallbackMap = { 'junhsu': 'JunHsu', 'shuntian': '順天宮', 'kk': 'KK' };
   let isValidTeam = false;
 
-  try {
-    const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
-    const teams = await resp.json();
-
-    if (Array.isArray(teams)) {
-      const teamMap = {};
-      teams.forEach(t => {
-        if (t && t.param && t.name) teamMap[t.param.toLowerCase()] = t.name;
-      });
-      if (teamMap[rawTeamParam]) {
-        currentTeam = teamMap[rawTeamParam];
-        isValidTeam = true;
-      }
+  // 先用快取，沒有快取才打 API
+  let teams = cacheGet('teams_cache', 10 * 60 * 1000); // 快取 10 分鐘
+  if (!teams) {
+    try {
+      const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
+      teams = await resp.json();
+      if (Array.isArray(teams)) cacheSet('teams_cache', teams);
+    } catch (e) {
+      console.error('載入團購主設定失敗，使用備援對照表', e);
     }
-  } catch (e) {
-    console.error('載入團購主設定失敗，使用備援對照表', e);
-    if (fallbackMap[rawTeamParam]) {
-      currentTeam = fallbackMap[rawTeamParam];
+  }
+
+  if (Array.isArray(teams)) {
+    const teamMap = {};
+    teams.forEach(t => {
+      if (t && t.param && t.name) teamMap[t.param.toLowerCase()] = t;
+    });
+    const matched = teamMap[rawTeamParam];
+    if (matched) {
+      currentTeam = matched.name;
+      teamPassword = matched.password || '';
       isValidTeam = true;
     }
   }
 
-  // 非合法團購主 → 顯示封鎖畫面，停止載入
+  // 備援
+  if (!isValidTeam && fallbackMap[rawTeamParam]) {
+    currentTeam = fallbackMap[rawTeamParam];
+    isValidTeam = true;
+  }
+
   if (!isValidTeam) {
     showInvalidTeamPage();
     return;
+  }
+
+  // 密碼驗證
+  if (teamPassword && !sessionStorage.getItem('auth_' + rawTeamParam)) {
+    showPasswordModal();
+    await new Promise(resolve => { resolvePasswordPromise = resolve; });
   }
 
   // 更新標題
@@ -1413,6 +1497,27 @@ async function initPage() {
 
   // 載入商品
   await loadProducts();
+}
+
+function showPasswordModal() {
+  document.getElementById('passwordOverlay').style.display = 'flex';
+  const input = document.getElementById('passwordInput');
+  input.value = '';
+  document.getElementById('passwordError').style.display = 'none';
+  setTimeout(() => input.focus(), 100);
+}
+
+function verifyPassword() {
+  const entered = document.getElementById('passwordInput').value;
+  if (entered === teamPassword) {
+    sessionStorage.setItem('auth_' + rawTeamParam, '1');
+    document.getElementById('passwordOverlay').style.display = 'none';
+    if (resolvePasswordPromise) { resolvePasswordPromise(); resolvePasswordPromise = null; }
+  } else {
+    document.getElementById('passwordError').style.display = 'block';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
 }
 
 function showInvalidTeamPage() {

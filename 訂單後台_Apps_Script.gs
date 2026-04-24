@@ -115,22 +115,23 @@ function doGet(e) {
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       var canSell = row[teamColIndex];
-      if (canSell !== true) continue;
+      var canSellBool = (canSell === true || String(canSell).toUpperCase() === 'TRUE');
+      if (!canSellBool) continue;
 
-      // 標籤：逗號分隔字串 → 陣列
-      var tagsStr = String(row[7] || '');
+      // 標籤：逗號分隔字串 → 陣列（刪除舊A欄後，H欄 = row[6]）
+      var tagsStr = String(row[6] || '');
       var tags = tagsStr ? tagsStr.split(',').map(function(t) { return t.trim(); }) : [];
 
       allowedProducts.push({
         id:          'prod_' + (i + 1),       // 自動ID：第2列 = prod_2
-        name:        String(row[1] || ''),    // B：商品名稱
-        category:    String(row[2] || ''),    // C：分類
-        price:       Number(row[3]) || 0,     // D：價格
-        weight:      String(row[4] || ''),    // E：規格
-        description: String(row[5] || ''),    // F：描述
-        image:       String(row[6] || ''),    // G：圖片路徑
-        tags:        tags,                    // H：標籤
-        inStock:     row[8] === true          // I：庫存
+        name:        String(row[0] || ''),    // A：商品名稱
+        category:    String(row[1] || ''),    // B：分類
+        price:       Number(row[2]) || 0,     // C：價格
+        weight:      String(row[3] || ''),    // D：規格
+        description: String(row[4] || ''),    // E：描述
+        image:       String(row[5] || ''),    // F：圖片路徑
+        tags:        tags,                    // G：標籤
+        inStock:     row[7] === true || String(row[7]).toUpperCase() === 'TRUE'  // H：庫存
       });
     }
 
@@ -225,15 +226,16 @@ function getTeams() {
     }
 
     var data = sheet.getDataRange().getValues();
-    // 標題列格式：A=URL參數  B=顯示名稱  C=是否啟用（TRUE/FALSE）
+    // 標題列格式：A=URL參數  B=顯示名稱  C=是否啟用（TRUE/FALSE）  D=密碼
     var teams = [];
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      var param   = String(row[0] || '').trim().toLowerCase();
-      var name    = String(row[1] || '').trim();
-      var enabled = (row[2] === true || String(row[2]).toLowerCase() === 'true');
+      var param    = String(row[0] || '').trim().toLowerCase();
+      var name     = String(row[1] || '').trim();
+      var enabled  = (row[2] === true || String(row[2]).toLowerCase() === 'true');
+      var password = String(row[3] || '').trim();
       if (param && name && enabled) {
-        teams.push({ param: param, name: name });
+        teams.push({ param: param, name: name, password: password });
       }
     }
 
