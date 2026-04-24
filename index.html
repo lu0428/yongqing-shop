@@ -905,11 +905,14 @@ function cacheSet(key, data) {
 let teamPassword = '';
 let resolvePasswordPromise = null;
 
+// ── 快取版本（取 GAS URL 末 8 碼，換部署就自動失效舊快取）──
+const CACHE_VER = APPS_SCRIPT_URL.slice(-12);
+
 // ── 商品動態載入（從 Google Sheet 讀取完整商品資料）──
 let productsApiLoaded = false;
 
 async function loadProducts() {
-  const cacheKey = 'products_' + currentTeam;
+  const cacheKey = 'products_' + currentTeam + '_' + CACHE_VER;
   const cached = cacheGet(cacheKey, 5 * 60 * 1000); // 快取 5 分鐘
   if (cached) {
     products = cached;
@@ -928,7 +931,7 @@ async function fetchFreshProducts() {
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) {
       products = data;
-      cacheSet('products_' + currentTeam, data);
+      cacheSet('products_' + currentTeam + '_' + CACHE_VER, data);
     } else {
       products = [];
     }
@@ -1374,7 +1377,7 @@ var allOrders = [];
 
 async function loadTeamOrders() {
   var body = document.getElementById('ordersBody');
-  const cacheKey = 'orders_' + currentTeam;
+  const cacheKey = 'orders_' + currentTeam + '_' + CACHE_VER;
   const cached = cacheGet(cacheKey, 2 * 60 * 1000); // 快取 2 分鐘
   if (cached) {
     allOrders = cached;
@@ -1397,7 +1400,7 @@ async function fetchFreshOrders() {
       return;
     }
     allOrders = Array.isArray(data) ? data : [];
-    cacheSet('orders_' + currentTeam, allOrders);
+    cacheSet('orders_' + currentTeam + '_' + CACHE_VER, allOrders);
     filterOrders();
   } catch (e) {
     console.error('載入訂單失敗', e);
@@ -1443,12 +1446,12 @@ async function initPage() {
   let isValidTeam = false;
 
   // 先用快取，沒有快取才打 API
-  let teams = cacheGet('teams_cache', 10 * 60 * 1000); // 快取 10 分鐘
+  let teams = cacheGet('teams_cache_' + CACHE_VER, 10 * 60 * 1000); // 快取 10 分鐘
   if (!teams) {
     try {
       const resp = await fetch(`${APPS_SCRIPT_URL}?action=getTeams`);
       teams = await resp.json();
-      if (Array.isArray(teams)) cacheSet('teams_cache', teams);
+      if (Array.isArray(teams)) cacheSet('teams_cache_' + CACHE_VER, teams);
     } catch (e) {
       console.error('載入團購主設定失敗，使用備援對照表', e);
     }
