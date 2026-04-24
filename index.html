@@ -930,6 +930,11 @@ async function fetchFreshProducts() {
   try {
     const response = await fetch(`${APPS_SCRIPT_URL}?team=${currentTeam}`);
     const data = await response.json();
+    // 授權停用
+    if (data && data.status === 'suspended') {
+      showSuspendedPage(data.message);
+      return;
+    }
     if (Array.isArray(data) && data.length > 0) {
       products = data;
       cacheSet('products_' + currentTeam + '_' + CACHE_VER, data);
@@ -1534,6 +1539,21 @@ function showInvalidTeamPage() {
       <p style="font-size:14px;color:#888;line-height:1.8;">
         您所訪問的團購頁面不存在或已停用。<br>
         請確認網址是否正確，或聯繫相關人員取得正確連結。
+      </p>
+    </div>
+  `;
+}
+
+function showSuspendedPage(message) {
+  document.title = '服務暫停';
+  document.body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                height:100vh;font-family:sans-serif;color:#555;text-align:center;padding:20px;">
+      <div style="font-size:64px;margin-bottom:16px;">🔒</div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#333;">服務暫停中</h2>
+      <p style="font-size:14px;color:#888;line-height:1.8;">
+        ${message || '此服務目前暫停使用。'}<br>
+        請聯繫相關人員以恢復服務。
       </p>
     </div>
   `;

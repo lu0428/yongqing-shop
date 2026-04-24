@@ -4,6 +4,36 @@
 //   存取權限：所有人
 // 部署後取得網址，貼到 index.html 的 APPS_SCRIPT_URL
 
+// ── A 端授權設定 ──
+var A_END_URL  = 'https://script.google.com/macros/s/AKfycbzanGWP_MMuhIiz_513Z7PJ8NBWFpzMgYq8C-JzmJHVPF89yqVfj9Ah1eh4KsWpmWjS/exec';
+var CLIENT_ID  = 'yongqing';
+var AUTH_CACHE_TTL = 24 * 60 * 60; // 快取 24 小時（秒）
+
+// 檢查授權（有快取就用快取，避免每次都打 A 端 API）
+function checkLicense() {
+  var cache  = CacheService.getScriptCache();
+  var cached = cache.get('license_' + CLIENT_ID);
+  if (cached) return JSON.parse(cached);
+
+  try {
+    var resp   = UrlFetchApp.fetch(A_END_URL + '?client=' + CLIENT_ID);
+    var result = JSON.parse(resp.getContentText());
+    cache.put('license_' + CLIENT_ID, JSON.stringify(result), AUTH_CACHE_TTL);
+    return result;
+  } catch (e) {
+    // A 端連不上時，暫時放行（避免 A 端故障影響 B 端服務）
+    Logger.log('授權驗證失敗，暫時放行：' + e.toString());
+    return { valid: true };
+  }
+}
+
+// 回傳授權停用的標準訊息
+function suspendedResponse(message) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'suspended', message: message || '服務暫停' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 var SHEET_NAME = '訂單';
 
 function getOrCreateSheet() {
@@ -32,6 +62,9 @@ function getOrCreateSheet() {
 }
 
 function doPost(e) {
+  var license = checkLicense();
+  if (!license.valid) return suspendedResponse(license.message);
+
   try {
     var data = JSON.parse(e.postData.contents);
     var sheet = getOrCreateSheet();
@@ -69,6 +102,9 @@ function doPost(e) {
 //   ?team=xxx                  → 回傳該團購主可售商品清單
 //   ?action=getOrders&team=xxx → 回傳該團購主的訂單（B/C/D/F/K 欄）
 function doGet(e) {
+  var license = checkLicense();
+  if (!license.valid) return suspendedResponse(license.message);
+
   try {
     var action = (e && e.parameter && e.parameter.action) || '';
     var team = (e && e.parameter && e.parameter.team) || 'JunHsu';
