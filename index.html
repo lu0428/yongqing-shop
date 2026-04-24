@@ -1483,7 +1483,7 @@ async function initPage() {
   }
 
   // 密碼驗證
-  if (teamPassword && !sessionStorage.getItem('auth_' + rawTeamParam)) {
+  if (teamPassword && !localStorage.getItem('auth_' + rawTeamParam)) {
     showPasswordModal();
     await new Promise(resolve => { resolvePasswordPromise = resolve; });
   }
@@ -1514,7 +1514,7 @@ function showPasswordModal() {
 function verifyPassword() {
   const entered = document.getElementById('passwordInput').value;
   if (entered === teamPassword) {
-    sessionStorage.setItem('auth_' + rawTeamParam, '1');
+    localStorage.setItem('auth_' + rawTeamParam, '1');
     document.getElementById('passwordOverlay').style.display = 'none';
     if (resolvePasswordPromise) { resolvePasswordPromise(); resolvePasswordPromise = null; }
   } else {
