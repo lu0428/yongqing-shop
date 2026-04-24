@@ -4,24 +4,53 @@
 //   存取權限：所有人
 // 部署後取得網址，貼到 index.html 的 APPS_SCRIPT_URL
 
-// ── A 端授權設定 ──
-var A_END_URL  = 'https://script.google.com/macros/s/AKfycbzanGWP_MMuhIiz_513Z7PJ8NBWFpzMgYq8C-JzmJHVPF89yqVfj9Ah1eh4KsWpmWjS/exec';
-var CLIENT_ID  = 'yongqing';
+// ── A 端授權設定（直接讀 A 端 Google Sheet，不需 HTTP 呼叫）──
+var A_SHEET_ID   = '1iVcl6O77c2JtMknoYb3OR8BaxEGsVIksKyyKrRb-lMk';
+var CLIENT_ID    = 'yongqing';
 var AUTH_CACHE_TTL = 24 * 60 * 60; // 快取 24 小時（秒）
 
-// 檢查授權（有快取就用快取，避免每次都打 A 端 API）
+// 檢查授權（有快取就用快取，避免每次都讀 A 端 Sheet）
 function checkLicense() {
   var cache  = CacheService.getScriptCache();
   var cached = cache.get('license_' + CLIENT_ID);
   if (cached) return JSON.parse(cached);
 
   try {
-    var resp   = UrlFetchApp.fetch(A_END_URL + '?client=' + CLIENT_ID);
-    var result = JSON.parse(resp.getContentText());
-    cache.put('license_' + CLIENT_ID, JSON.stringify(result), AUTH_CACHE_TTL);
-    return result;
+    var ss    = SpreadsheetApp.openById(A_SHEET_ID);
+    var sheet = ss.getSheetByName('授權管理');
+    if (!sheet) return { valid: false, message: '找不到授權資料表' };
+
+    var data = sheet.getDataRange().getValues();
+    // 欄位：A=識別碼  B=公司名稱  C=到期日  D=狀態
+    for (var i = 1; i < data.length; i++) {
+      var row    = data[i];
+      var id     = String(row[0] || '').trim().toLowerCase();
+      if (id !== CLIENT_ID.toLowerCase()) continue;
+
+      var name   = String(row[1] || '').trim();
+      var expiry = row[2];
+      var status = String(row[3] || '').trim();
+
+      if (status !== '啟用') {
+        var result = { valid: false, message: '服務暫停，請聯繫' + name };
+        cache.put('license_' + CLIENT_ID, JSON.stringify(result), AUTH_CACHE_TTL);
+        return result;
+      }
+
+      if (expiry && new Date(expiry) < new Date()) {
+        var result = { valid: false, message: '服務已到期，請聯繫' + name };
+        cache.put('license_' + CLIENT_ID, JSON.stringify(result), AUTH_CACHE_TTL);
+        return result;
+      }
+
+      var result = { valid: true };
+      cache.put('license_' + CLIENT_ID, JSON.stringify(result), AUTH_CACHE_TTL);
+      return result;
+    }
+
+    return { valid: false, message: '找不到此授權' };
+
   } catch (e) {
-    // A 端連不上時，暫時放行（避免 A 端故障影響 B 端服務）
     Logger.log('授權驗證失敗，暫時放行：' + e.toString());
     return { valid: true };
   }
@@ -292,4 +321,17 @@ function testWrite() {
   sheet.appendRow([new Date(), '測試姓名', '0912345678', '台北市中正區測試路1號', 'LINE Pay',
     '梳絡通透夜好眠足浴包 x2 $68', 68, '無備註', 'junhsu', '確認是否收款']);
   Logger.log('寫入成功');
+}
+
+// 手動清除授權快取（改完 A 端 Sheet 後執行，立即生效）
+function clearLicenseCache() {
+  CacheService.getScriptCache().remove('license_' + CLIENT_ID);
+  Logger.log('快取已清除');
+}
+
+// 測試授權結果（除錯用）
+function testCheckLicense() {
+  CacheService.getScriptCache().remove('license_' + CLIENT_ID);
+  var result = checkLicense();
+  Logger.log('結果：' + JSON.stringify(result));
 }
