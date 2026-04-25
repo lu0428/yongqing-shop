@@ -1,0 +1,20 @@
+# 系統檔
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 環境設定
+.env
+*.local
+
+# 商品業務資料（含真實定價，勿公開）
+商品資料_貼入Sheet.tsv
+商品資料輸入_中西藥局.csv
+商品資料輸入_漢方.csv
+products/漢方/

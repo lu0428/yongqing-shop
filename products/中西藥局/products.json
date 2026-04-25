@@ -1,0 +1,13 @@
+[
+  {
+    "id": "zx001",
+    "name": "商品名稱",
+    "category": "分類（例：維他命、保健食品、外用藥品）",
+    "price": 0,
+    "originalPrice": 0,
+    "description": "商品簡短說明",
+    "image": "images/中西藥局/商品圖檔名.jpg",
+    "inStock": true,
+    "tags": ["標籤1", "標籤2"]
+  }
+]
