@@ -1,5 +1,6 @@
 # 詠晴漢方團購網頁 — 技術狀態文件（Claude 參考用）
-> 最後更新：2026-04-25
+> 最後更新：2026-06-03
+> ⚠️ 2026-04 GitHub 帳號已從 `ki58328` 搬到 `lu0428`，下方 URL 已更新。Google 後端（GAS／Sheet）仍掛在 `ki.58328@gmail.com`，不受影響。
 
 ---
 
@@ -31,8 +32,8 @@
 
 | 項目 | 值 |
 |---|---|
-| GitHub Pages URL | https://ki58328.github.io/yongqing-shop/ |
-| GitHub Repo | https://github.com/ki58328/yongqing-shop |
+| GitHub Pages URL | https://lu0428.github.io/yongqing-shop/ |
+| GitHub Repo | https://github.com/lu0428/yongqing-shop |
 | B端 GAS URL | `https://script.google.com/macros/s/AKfycbyS5_PsiRKLwCFG0BMwrmczisV4BSLVoEMsoNoQ-VrxBWGxB3MDO0HT9ZXzSBlyyrHe-Q/exec` |
 | A端 GAS URL | `https://script.google.com/macros/s/AKfycbzanGWP_MMuhIiz_513Z7PJ8NBWFpzMgYq8C-JzmJHVPF89yqVfj9Ah1eh4KsWpmWjS/exec` |
 | A端 Google Sheet ID | `1iVcl6O77c2JtMknoYb3OR8BaxEGsVIksKyyKrRb-lMk` |
